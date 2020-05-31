@@ -1,0 +1,4 @@
+./klee --search=random-path --search=nurs:covnew -external-calls=all --max-memory=50 1.bc
+PID: 16967
+Using monotonic steady clock with 1/1000000000s resolution
+Started: 2020-05-19 14:10:04

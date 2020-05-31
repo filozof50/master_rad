@@ -1,0 +1,5 @@
+/home/strahinja/repo/runtime/runtime_build_Debug+Asserts/Intrinsic/klee_int.bc: \
+  /home/strahinja/repo/klee/runtime/Intrinsic/klee_int.c \
+  /home/strahinja/repo/klee/include/klee/klee.h
+
+/home/strahinja/repo/klee/include/klee/klee.h:

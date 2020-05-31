@@ -1,0 +1,2 @@
+/home/strahinja/repo/runtime/runtime_build_Debug+Asserts/klee-libc/strncpy.bc: \
+  /home/strahinja/repo/klee/runtime/klee-libc/strncpy.c

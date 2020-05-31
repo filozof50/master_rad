@@ -1,0 +1,200 @@
+Determining if the include file util.h exists failed with the following output:
+Change Dir: /home/strahinja/repo/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_60d8c/fast && /usr/bin/make -f CMakeFiles/cmTC_60d8c.dir/build.make CMakeFiles/cmTC_60d8c.dir/build
+make[1]: Entering directory '/home/strahinja/repo/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_60d8c.dir/CheckIncludeFile.c.o
+/usr/bin/gcc   -Wall -Wextra -Wno-unused-parameter    -o CMakeFiles/cmTC_60d8c.dir/CheckIncludeFile.c.o   -c /home/strahinja/repo/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+/home/strahinja/repo/CMakeFiles/CMakeTmp/CheckIncludeFile.c:1:10: fatal error: util.h: No such file or directory
+ #include <util.h>
+          ^~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_60d8c.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_60d8c.dir/CheckIncludeFile.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_60d8c.dir/CheckIncludeFile.c.o] Error 1
+make[1]: Leaving directory '/home/strahinja/repo/CMakeFiles/CMakeTmp'
+Makefile:121: recipe for target 'cmTC_60d8c/fast' failed
+make: *** [cmTC_60d8c/fast] Error 2
+
+
+
+Determining if the include file libutil.h exists failed with the following output:
+Change Dir: /home/strahinja/repo/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_72495/fast && /usr/bin/make -f CMakeFiles/cmTC_72495.dir/build.make CMakeFiles/cmTC_72495.dir/build
+make[1]: Entering directory '/home/strahinja/repo/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_72495.dir/CheckIncludeFile.c.o
+/usr/bin/gcc   -Wall -Wextra -Wno-unused-parameter    -o CMakeFiles/cmTC_72495.dir/CheckIncludeFile.c.o   -c /home/strahinja/repo/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+/home/strahinja/repo/CMakeFiles/CMakeTmp/CheckIncludeFile.c:1:10: fatal error: libutil.h: No such file or directory
+ #include <libutil.h>
+          ^~~~~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_72495.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_72495.dir/CheckIncludeFile.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_72495.dir/CheckIncludeFile.c.o] Error 1
+make[1]: Leaving directory '/home/strahinja/repo/CMakeFiles/CMakeTmp'
+Makefile:121: recipe for target 'cmTC_72495/fast' failed
+make: *** [cmTC_72495/fast] Error 2
+
+
+
+Determining if the function openpty exists failed with the following output:
+Change Dir: /home/strahinja/repo/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_7673a/fast && /usr/bin/make -f CMakeFiles/cmTC_7673a.dir/build.make CMakeFiles/cmTC_7673a.dir/build
+make[1]: Entering directory '/home/strahinja/repo/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_7673a.dir/CheckFunctionExists.c.o
+/usr/bin/gcc   -Wall -Wextra -Wno-unused-parameter -DCHECK_FUNCTION_EXISTS=openpty   -o CMakeFiles/cmTC_7673a.dir/CheckFunctionExists.c.o   -c /usr/local/share/cmake-3.15/Modules/CheckFunctionExists.c
+Linking C executable cmTC_7673a
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_7673a.dir/link.txt --verbose=1
+/usr/bin/gcc  -Wall -Wextra -Wno-unused-parameter -DCHECK_FUNCTION_EXISTS=openpty    -rdynamic CMakeFiles/cmTC_7673a.dir/CheckFunctionExists.c.o  -o cmTC_7673a 
+CMakeFiles/cmTC_7673a.dir/CheckFunctionExists.c.o: In function `main':
+CheckFunctionExists.c:(.text+0x10): undefined reference to `openpty'
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_7673a.dir/build.make:86: recipe for target 'cmTC_7673a' failed
+make[1]: *** [cmTC_7673a] Error 1
+make[1]: Leaving directory '/home/strahinja/repo/CMakeFiles/CMakeTmp'
+Makefile:121: recipe for target 'cmTC_7673a/fast' failed
+make: *** [cmTC_7673a/fast] Error 2
+
+
+
+Determining if the malloc_zone_statistics exist failed with the following output:
+Change Dir: /home/strahinja/repo/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_67284/fast && /usr/bin/make -f CMakeFiles/cmTC_67284.dir/build.make CMakeFiles/cmTC_67284.dir/build
+make[1]: Entering directory '/home/strahinja/repo/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_67284.dir/CheckSymbolExists.cxx.o
+/usr/bin/g++    -Wall -Wextra -Wno-unused-parameter    -o CMakeFiles/cmTC_67284.dir/CheckSymbolExists.cxx.o -c /home/strahinja/repo/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx
+/home/strahinja/repo/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx:2:10: fatal error: malloc/malloc.h: No such file or directory
+ #include <malloc/malloc.h>
+          ^~~~~~~~~~~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_67284.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_67284.dir/CheckSymbolExists.cxx.o' failed
+make[1]: *** [CMakeFiles/cmTC_67284.dir/CheckSymbolExists.cxx.o] Error 1
+make[1]: Leaving directory '/home/strahinja/repo/CMakeFiles/CMakeTmp'
+Makefile:121: recipe for target 'cmTC_67284/fast' failed
+make: *** [cmTC_67284/fast] Error 2
+
+
+File /home/strahinja/repo/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx:
+/* */
+#include <malloc/malloc.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef malloc_zone_statistics
+  return ((int*)(&malloc_zone_statistics))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the include file selinux/selinux.h exists failed with the following output:
+Change Dir: /home/strahinja/repo/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_b9641/fast && /usr/bin/make -f CMakeFiles/cmTC_b9641.dir/build.make CMakeFiles/cmTC_b9641.dir/build
+make[1]: Entering directory '/home/strahinja/repo/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_b9641.dir/CheckIncludeFile.c.o
+/usr/bin/gcc   -Wall -Wextra -Wno-unused-parameter    -o CMakeFiles/cmTC_b9641.dir/CheckIncludeFile.c.o   -c /home/strahinja/repo/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+/home/strahinja/repo/CMakeFiles/CMakeTmp/CheckIncludeFile.c:1:10: fatal error: selinux/selinux.h: No such file or directory
+ #include <selinux/selinux.h>
+          ^~~~~~~~~~~~~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_b9641.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_b9641.dir/CheckIncludeFile.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_b9641.dir/CheckIncludeFile.c.o] Error 1
+make[1]: Leaving directory '/home/strahinja/repo/CMakeFiles/CMakeTmp'
+Makefile:121: recipe for target 'cmTC_b9641/fast' failed
+make: *** [cmTC_b9641/fast] Error 2
+
+
+
+Determining if the include file sys/acl.h exists failed with the following output:
+Change Dir: /home/strahinja/repo/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_6d667/fast && /usr/bin/make -f CMakeFiles/cmTC_6d667.dir/build.make CMakeFiles/cmTC_6d667.dir/build
+make[1]: Entering directory '/home/strahinja/repo/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_6d667.dir/CheckIncludeFile.c.o
+/usr/bin/gcc   -Wall -Wextra -Wno-unused-parameter    -o CMakeFiles/cmTC_6d667.dir/CheckIncludeFile.c.o   -c /home/strahinja/repo/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+/home/strahinja/repo/CMakeFiles/CMakeTmp/CheckIncludeFile.c:1:10: fatal error: sys/acl.h: No such file or directory
+ #include <sys/acl.h>
+          ^~~~~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_6d667.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_6d667.dir/CheckIncludeFile.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_6d667.dir/CheckIncludeFile.c.o] Error 1
+make[1]: Leaving directory '/home/strahinja/repo/CMakeFiles/CMakeTmp'
+Makefile:121: recipe for target 'cmTC_6d667/fast' failed
+make: *** [cmTC_6d667/fast] Error 2
+
+
+
+Performing C++ SOURCE FILE Test LLVM_PR39177_FIXED failed with the following output:
+Change Dir: /home/strahinja/repo/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_18891/fast && /usr/bin/make -f CMakeFiles/cmTC_18891.dir/build.make CMakeFiles/cmTC_18891.dir/build
+make[1]: Entering directory '/home/strahinja/repo/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_18891.dir/src.cxx.o
+/usr/bin/g++   -I/usr/lib/llvm-6.0/include  -Wall -Wextra -Wno-unused-parameter -DLLVM_PR39177_FIXED   -o CMakeFiles/cmTC_18891.dir/src.cxx.o -c /home/strahinja/repo/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_18891
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_18891.dir/link.txt --verbose=1
+/usr/bin/g++   -Wall -Wextra -Wno-unused-parameter -DLLVM_PR39177_FIXED    -rdynamic CMakeFiles/cmTC_18891.dir/src.cxx.o  -o cmTC_18891 -Wl,-rpath,/usr/lib/llvm-6.0/lib /usr/lib/llvm-6.0/lib/libLLVM-6.0.so 
+make[1]: Leaving directory '/home/strahinja/repo/CMakeFiles/CMakeTmp'
+
+
+...and run output:
+
+Return value: 1
+Source file was:
+
+    #include "llvm/Analysis/TargetLibraryInfo.h"
+    #include "llvm/AsmParser/Parser.h"
+    #include "llvm/AsmParser/SlotMapping.h"
+    #include "llvm/IR/ConstantFolder.h"
+    #include "llvm/IR/Constants.h"
+    #include "llvm/IR/DataLayout.h"
+    #include "llvm/IR/DiagnosticInfo.h"
+    #include "llvm/IR/Instructions.h"
+    #include "llvm/IR/IRBuilder.h"
+    #include "llvm/IR/LLVMContext.h"
+    #include "llvm/Transforms/Utils/BuildLibCalls.h"
+
+    #include <signal.h>
+
+    void handler(int, siginfo_t*, void*) {
+      // program received SIGSEGV
+      exit(1);
+    }
+
+    using namespace llvm;
+
+    int main() {
+      // capture segfault
+      struct sigaction action;
+      memset(&action, 0, sizeof(struct sigaction));
+      action.sa_flags = SA_SIGINFO;
+      action.sa_sigaction = handler;
+      sigaction(SIGSEGV, &action, NULL);
+
+      // setup test
+      LLVMContext Ctx;
+      SMDiagnostic Error;
+      SlotMapping Mapping;
+      auto M = llvm::parseAssemblyFile("/home/strahinja/repo/klee/cmake/workaround_llvm_pr39177.ll", Error, Ctx, &Mapping);
+      if (!M) {
+        Error.print("AssemblyString", llvm::errs());
+        return -1;
+      }
+
+      auto *F = M->getFunction("test");
+      auto *CI = cast<CallInst>(&*std::next(F->begin()->begin()));
+      auto &DL = M->getDataLayout();
+      Value *Size = ConstantInt::get(DL.getIntPtrType(Ctx), 8);
+      ConstantFolder CF;
+      IRBuilder<> B(&*F->begin(), CF);
+      TargetLibraryInfo TLI = TargetLibraryInfoWrapperPass({"x86_64", "", "linux-gnu"}).getTLI();
+
+      // test if this call produces segfault
+      emitFWrite(CI->getArgOperand(1), Size, CI->getArgOperand(0), B, DL, &TLI);
+
+      return 0;
+    }

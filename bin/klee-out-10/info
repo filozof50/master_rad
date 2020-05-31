@@ -1,0 +1,4 @@
+./klee --max-memory=2 --max-time=360min --search=nurs:covnew --use-batching-search --batch-instructions=1000 1.bc
+PID: 6153
+Using monotonic steady clock with 1/1000000000s resolution
+Started: 2020-05-29 13:53:19

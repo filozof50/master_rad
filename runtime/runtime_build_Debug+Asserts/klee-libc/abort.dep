@@ -1,0 +1,5 @@
+/home/strahinja/repo/runtime/runtime_build_Debug+Asserts/klee-libc/abort.bc: \
+  /home/strahinja/repo/klee/runtime/klee-libc/abort.c \
+  /home/strahinja/repo/klee/include/klee/klee.h
+
+/home/strahinja/repo/klee/include/klee/klee.h:

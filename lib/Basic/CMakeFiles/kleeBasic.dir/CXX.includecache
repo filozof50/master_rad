@@ -1,0 +1,40 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/strahinja/repo/klee/lib/Basic/KTest.cpp
+klee/Internal/ADT/KTest.h
+/home/strahinja/repo/klee/lib/Basic/klee/Internal/ADT/KTest.h
+stdlib.h
+-
+string.h
+-
+stdio.h
+-
+
+/home/strahinja/repo/klee/lib/Basic/Statistics.cpp
+klee/Statistics.h
+/home/strahinja/repo/klee/lib/Basic/klee/Statistics.h
+vector
+-
+
+klee/include/klee/Internal/ADT/KTest.h
+
+klee/include/klee/Statistic.h
+string
+-
+
+klee/include/klee/Statistics.h
+Statistic.h
+klee/include/klee/Statistic.h
+vector
+-
+string
+-
+string.h
+-
+

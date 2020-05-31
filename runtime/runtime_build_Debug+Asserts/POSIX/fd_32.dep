@@ -1,0 +1,11 @@
+/home/strahinja/repo/runtime/runtime_build_Debug+Asserts/POSIX/fd_32.bc: \
+  /home/strahinja/repo/klee/runtime/POSIX/fd_32.c \
+  /home/strahinja/repo/klee/include/klee/Config/Version.h \
+  /home/strahinja/repo/include/klee/Config/config.h \
+  /home/strahinja/repo/klee/runtime/POSIX/fd.h
+
+/home/strahinja/repo/klee/include/klee/Config/Version.h:
+
+/home/strahinja/repo/include/klee/Config/config.h:
+
+/home/strahinja/repo/klee/runtime/POSIX/fd.h:
