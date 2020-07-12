@@ -1,0 +1,6 @@
+Error: ASSERTION FAIL: n != 0
+File: 1.c
+Line: 241
+assembly.ll line: 65
+Stack: 
+	#000000065 in main () at 1.c:241

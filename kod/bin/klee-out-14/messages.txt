@@ -1,0 +1,8 @@
+KLEE: Using STP solver backend
+KLEE: ERROR: 1.c:250: external call with symbolic argument: printf
+KLEE: NOTE: now ignoring this error at this location
+KLEE: ERROR: 1.c:241: ASSERTION FAIL: n != 0
+KLEE: NOTE: now ignoring this error at this location
+KLEE: ERROR: 1.c:248: external call with symbolic argument: printf
+KLEE: NOTE: now ignoring this error at this location
+KLEE: halting execution, dumping remaining states
