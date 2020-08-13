@@ -40,6 +40,11 @@
 
 % Ostali paketi koji se koriste u dokumentu
 \usepackage{listings} % listing programskog koda
+\lstset { %
+    language=C++,
+    backgroundcolor=\color{black!5}, % set backgroundcolor
+    basicstyle=\footnotesize,% basic font setting
+}
 
 % Ime kandidata na srpskom jeziku (u odabranom pismu)
 \autor{Strahinja Stanojević}
@@ -92,9 +97,11 @@
 
 % ------------------------------------------------------------------------------
 \chapter{Simboličko izvršavanje} \label{chp:simbolicko_izvrsavanje}
-U ovom poglavlju će biti opisani opšti principi na kojima se temelji simboličko izvršavanje u okviru mnogo šire oblasti računarstva, verfikacije softvera. U okviru verifikacije softvera postoje 2 velike oblasti, \textit{statička verifikacija softvera} i \textit{dinamička verifikacija softvera}. Statička verifikacija softvera se odnosi na tehnike verifikacije softvera kod kojih je moguće otkrivanje grešaka i rizičnog ponašanja napisanog programskog koda bez njegove prethodne kompilacije i pokretanja. Kod dinamičke verifikacije je nepohodno kompajlirati kod, pokrenuti ga, i tek je onda moguće otkriti greške i kritične delove. Simboličko izvršavanje je jedna od tehnika statičke verifikacije softvera, odnosno bavi se statičkom analizom koda. Jedna je od najkorišćenijih tehnika statičke verifikacije. Na primer, još od 2008. nad većinom Majkrosoftovih (eng. \textit{Microsoft}) aplikacija se vrši 24/7 verifikacija pomoću simboličkog izvršavanja, pre nego što aplikacije budu objavljene. Dodatno, skoro 30\% grešaka u operativnom sistemu Windows 7 je pronađeno baš korišćenjem ove tehnike. Ova činjenica se odnosi na greške koje nisu bile otkrivene korišćenjem drugih tehnika za statičku i dinamičku analizu softvera. 
+U ovom poglavlju će biti opisani opšti principi na kojima se temelji simboličko izvršavanje u okviru mnogo šire oblasti računarstva, verfikacije softvera. U okviru verifikacije softvera postoje dve velike oblasti, \textit{statička verifikacija softvera} i \textit{dinamička verifikacija softvera}. Statička verifikacija softvera se odnosi na tehnike verifikacije softvera kod kojih je moguće otkrivanje grešaka i rizičnog ponašanja napisanog programskog koda bez njegove prethodne kompilacije i pokretanja. Kod dinamičke verifikacije je nepohodno kompajlirati kod, pokrenuti ga, i tek je onda moguće otkriti greške i kritične delove. Simboličko izvršavanje je jedna od tehnika statičke verifikacije softvera, odnosno bavi se statičkom analizom koda. Jedna je od najkorišćenijih tehnika statičke verifikacije. Na primer, još od 2008. nad većinom Majkrosoftovih (eng. \textit{Microsoft}) aplikacija se vrši 24/7 verifikacija pomoću simboličkog izvršavanja, pre nego što aplikacije budu objavljene. Dodatno, skoro 30\% grešaka u operativnom sistemu Windows 7 je pronađeno baš korišćenjem ove tehnike. Ova činjenica se odnosi na greške koje nisu bile otkrivene korišćenjem drugih tehnika za statičku i dinamičku analizu softvera. 
 
 \section{Osnovni primer simboličkog izvršavanja}
+Na početku ovog poglavlja je ukratko opisano šta predstavlja simboličko izvršavanje. U ovom delu će detaljnije biti objašnjeno na koji način simbioličko izvršavanje radi na primeru jedne jednostavne funkcije. 
+\newpage
     \begin{lstlisting}[caption={Osnovni primer simboličkog izvršavanja},captionpos=b,label={lst:osnovni_primer}]
         1. void foo(int a, int b) {
         2.   int x = 1, y = 0;
@@ -142,8 +149,6 @@ Graf simboličkog izvršavanja može biti predstavljen stablom, što se može pr
 \centerline{$2(\alpha_a + \alpha_b) - 4 = 0 \land \alpha_a \neq 0 \land \alpha_b = 0$}
 \vskip 0.2in
 \noindent će dovesti do narušavanja uslova naredbe $assert$. Vrednosti koje bi dovele do greške se mogu odrediti pozivanjem $SMT$ rešavača, u datom primeru to su vrednosti $a = 2$ i $b = 0$.
-
-\newpage
 \section{Izazovi simboličkog izvršavanja}
 
 Osnovna ideja simboličkog izvršavanja je da se detaljnom analizom svih putanja kroz koje se može proći u kodu pronađu ulazne vrednosti koje bi mogle dovesti do grešaka. Teorijski gledano ovo je odličan koncept koji garantuje da nema \textit{saglasnost} (eng. \textit{soundness}) i \textit{kompletnost}. Saglasnost garantuje da neće biti lažno pozitivnih rezlutata, tj. da će svi ulazi koji mogu dovesti do grešaka biti otkriveni, dok kompletnost garantuje da neće biti lažno negativnih rezultata, što znači da svi ulazni podaci koji se odrede kao kritični, tj. oni koji mogu dovesti do grešaka, upravo to i jesu. U praksi, vrlo često ovo nije moguće postići jer se obično radi sa velikim softverom, tako da se obično zarad performansi žrtvuje saglasnost. Neki od glavnih izazova sa kojima se suočava simboličko izvršavanje su: 
@@ -158,7 +163,7 @@ Osnovna ideja simboličkog izvršavanja je da se detaljnom analizom svih putanja
 
 \noindent Način rešavanja navedenih problema u alatu KLEE će biti razmotren u poglavlju \ref{KLEE}.
 
-\section{Alati za simboličko izvršavanje i njihovi osnovni principi rada}
+\section{Osnovni principi rada alata za simboličko izvršavanje}
 Teorijska ideja simboličkog izvršavanja je da se istraže sve moguće putanje u okviru nekog koda (softvera) i da se odrede sve kombinacije ulaznih podataka koje bi dovele do grešaka. U praksi to nije moguće zbog ranije navedenih problema, pa samim tim alati za simboličko izvršavanje ne pretražuju sve moguće putanje. Jedan od dodatnih problema pored ranije navedenih zbog kog je nemoguće pronaći sve moguće putanje je taj što u realnom softveru postoji k\^od iz eksternih biblioteka kojima sam alat nema pristup, samim tim ne može da generiše sve putanje kroz taj deo koda. Sporedni efekti prilikom izvršavanja koda (kako programski koji se tiču simboličkih promenljivih tako i neki drugi koji se tiču arhitekture računara) mogu predstavljati problem pri rekonstrukciji kompletnog steka softvera koji se analizira. Osnovna ideja za rešavanje ovih problema je kombinovanje konkretnog i simboličkog izvršavanja, takozvano \textit{konkoličko izvršavanje} (eng. \textit{concolic}), što je kovanica reči \textit{concrete} i \textit{symbolic}.
 \newline
 \newline
@@ -168,7 +173,6 @@ Razmotrimo primer \ref{fig:osnovni_primer}. Neka su ulazne vrednosti \texttt{a =
 zatim se prelazi u stanje $B$ gde postoji grananje.
 Kako je uslov \texttt{a != 0} ispunjen, izvršavanje bi nastavilo stanjem $C$, nakon čega se nastavlja stanjem $E$ u kome opet imamo grananje. S obzirom uslov $b == 0$ nije ispunjen (jer imamo konkretu vrednost promenljive $b$ koja je $1$, izvršavanje ulazi u završno stanje $G$. 
 Konkretan memorijski prostor se kroz ovo izvršavanje menja na sledeći način:
-\newpage
 \begin{itemize}
     \item $\sigma_c = {a \rightarrow 1, a \rightarrow 1}$ u stanju $A$,
     
@@ -181,8 +185,8 @@ U stanju $G$ bi se ustanovilo da je sve u redu, tj. nema narušavanja ograničen
 Iako dinamičko simboličko izvršavanje počinje dodelom konkretnih vrednosti promenljivima, nove putanje se generišu negiranjem određenih uslova. Potrebno je odabrati uslov koje naredbe grananja će biti negiran. Broj naredbi grananja (samim tim i broj različitih putanja) u nekom kodu može biti jako veliki, s toga je neophodno na neki način vršiti odabir uslova koji će biti negirani jer je nemoguće u razumnom vremenu proći kroz sve putanje. Načini na koje različiti alati koji vrše dinamičko simboličko izvršavanje biraju koji će uslov biti negiran će biti diskutovan dalje u tekstu. 
 
 U nekim situacijama alat za simboličko izvršavanje koji radi na principu dinamičkog simboličkog izvršavanja ne može da isprati ceo k\^od simbolički. Razlog za to je što se u kodu može desiti da se pozivaju funkcije koje su deo neke eksterne biblioteke čiji izvorni k\^od nije dostupan. \\
-Razmotrimo sledeći primer:
-
+Razmotrimo primer \ref{lst:eksterna_1}:
+\newpage
 \bigbreak
     \begin{lstlisting}[caption={Primer gde rezultat izvršavanja eksterne funkcije nije važan},captionpos=b,label={lst:eksterna_1}]
         void foo(int a, int b)
@@ -209,9 +213,7 @@ Alat bi u ovom slučaju bi promenljivima $a$ i $b$ dodelio neke slučajne vredno
     \end{lstlisting}
 \bigbreak
 
-Posmatrajmo sada primer \ref{lst:eksterna_2}. Pretpostavimo da izvorni k\^od funkcije $bar$ nije poznat ni u ovom slučaju. Ono što se može primetiti je da uslov grananja koje je poznato direktno zavisi od rezultata njenog izvršavanja. Recimo da je alat za simboličko izvršavanje generisao ulazne podatke (vrednost za simboličku promenljivu $a$) tako da uslov poznate naredbe grananja nije poznat. SMT rešavač bi pokušao da negira uslov i generiše nove ulazne podatke koji bi trebalo da omoguće otkrivanje nove putanje. Međutim, kako izvorni k\^od funkcije $bar$ nije poznat a uslov grananja direktno zavisi od rezultata njenog izvršavanja nije moguće garantovati da će generisanjem novih ulaznih vrednosti biti otkrivena putanja koja može dovesti do greške. U nekim situacijama je alatu nemoguće da otkrije da ne postoje ulazni podaci koji mogu otkriti novu putanju, tj. da postoji nedostižan kod. Taj slučaj je ilustrovan narednim primerom:
-
-\newpage
+Posmatrajmo sada primer \ref{lst:eksterna_2}. Pretpostavimo da izvorni k\^od funkcije $bar$ nije poznat ni u ovom slučaju. Ono što se može primetiti je da uslov grananja koje je poznato direktno zavisi od rezultata njenog izvršavanja. Recimo da je alat za simboličko izvršavanje generisao ulazne podatke (vrednost za simboličku promenljivu $a$) tako da uslov poznate naredbe grananja nije poznat. SMT rešavač bi pokušao da negira uslov i generiše nove ulazne podatke koji bi trebalo da omoguće otkrivanje nove putanje. Međutim, kako izvorni k\^od funkcije $bar$ nije poznat a uslov grananja direktno zavisi od rezultata njenog izvršavanja nije moguće garantovati da će generisanjem novih ulaznih vrednosti biti otkrivena putanja koja može dovesti do greške. U nekim situacijama je alatu nemoguće da otkrije da ne postoje ulazni podaci koji mogu otkriti novu putanju, tj. da postoji nedostižan kod. Taj slučaj je ilustrovan primerom \ref{lst:eksterna_3}:
     \begin{lstlisting} [caption={Primer u kome može doći do divergencije putanje},captionpos=b,label={lst:eksterna_3}]
         void foo(int a)
         {
@@ -279,7 +281,7 @@ Postoji veliki broj različitih algoritama i heuristika koje koriste različiti 
 
 \textbf{Hibridne strategije} - uglavnom se svode na kombinaciju većeg broja algoritama koji se na određene načine smenjuju prilikom pretrage. Zavisno od specifičnih potreba (otkrivanje putanje do određene naredbe, otkrivanje što većeg broja putanja, pokrivenost koda itd.) koriste se kombinacije različitih algoritama koji se pri izvršavanju smenjuju i kombinuju na različite načine.
 
-\section{Alati za simboličko izvršavanje}
+\section{Pregled alata za simboličko izvršavanje} \label{alati_za_simbolicko}
 
 Postoji veliki broj različitih alata za simboličko izvršavanje. Većina ovih alata počiva na istim principima:
 
@@ -340,20 +342,15 @@ KLEE čuva vrednosti različitih promenljivih u skladištima. Postoje dva skladi
 \bigskip
 Količina radne memorije koja se dodeljuje samom alatu je ograničena i zadaje se kao jedan od parametara prilikom pokretanja samog KLEE-a. Zbog osobine alata da čuva sva stanja koja su vezana za sve putanje koje se izučavaju vrlo često dolazi do situacije gde se memorija popuni. Kada se ovo desi na neki način mora da dođe do ''pražnjenja''. To se radi tako što se odbacuju neka stanja. Broj stanja koja se izbacuju se određuje slučajnom metodom. Generiše se pseudo-slučajan broj i on predstavlja broj stanja koja se izbacuju. Postavlja se pitanje na koji način se biraju stanja koja bivaju izbačena. Ovo se takođe radi slučajno uz još jedan dodatan uslov, a to je da se ne izbacuju stanja koja su otkrila novu instrukciju. Generiše se pseudo-slučajan broj koji govori o indeksu stanja u nizu koje treba da bude izbačeno i ako u njemu nije otkrivena nova instrukcija ono može biti izbačeno. U suprotnom se generiše nov indeks i bira se drugo stanje za izbacivanje iz skupa aktivnih stanja.
 
-\section{Rad sa petljama i rekurzijom}
-Kada je reč o petljama KLEE ima prilično specifičan način rada. Naime, kako je alat potpuno simbolički, sve petlje se izvršavaju do kraja kroz sve potencijalne iteracije. Ako važi da je uslov izlaska iz petlje \texttt{i < n} gde je $n$ simbolička promenljiva, KLEE će pokušavati da prođe sve moguće iteracije. Ukoliko bi se znalo da je vrednost promenljive $n$ na primer $1000$ onda bi se petlja vrtela simbolički do vrednosti 1000. Međutim, kada je granica broja iteracija petlje simbolička promenljiva KLEE nema mogućnost da izvrti određen broj iteracija i vidi ponašanje programa, već se ide do maksimalne vrednosti koju može da čuva promenljiva tipa koji odgovara tipu promenljive $n$. Iz ovog razloga KLEE ima veliki problem sa petljama bez obzira na to koji se algoritam koristi. Često u okviru petlji postoje grananja što dovodi do toga da se kreira veliki broj novih stanja u okviru istih. Na ovaj način se i memorija brže puni što dovodi do potrebe za ranije opisanim odbacivanjem nekih stanja. Kada se govori o rekurzivnim funkcijama situacija je veoma slična. Rekurzija se ''vrti'' do uslova izlaska. Ukoliko uislov izlaska iz rekurzije zavisi od simboličke promenljive javlja se isti problem kao i pri radu sa petljama u okviru alata KLEE.
-
-\section{Funkcije u KLEE-u}
+\section{Kontrola toka u alatu KLEE}
 Rad sa funkcijama u alatu KLEE se ne razlikuje previše od standardnog rada sa funkcijama u nekom programskom jeziku. Neka je potrebno simbolički izvršiti funkciju $f$. I neka to bude funkcija koja se poziva iz funkcije $g$ sa parametrom $a$ bez povratne vrednosti. Dakle, \texttt{void f(int a)}. Postoji ''stek'' na kome se čuvaju lokalne promenljive i parametri funkcije $f$. Takođe se pamti koja je funkcija pozivalac kao i koju naredbu funkcije $g$ treba izvršiti nakon što $f$ bude izvršena. Sve promenljive se i dalje čuvaju u ranije opisanim skladištima. Nakon što se završi izvršavanje funkcije memorija na kojoj su se nalazile lokalne promenljive postaje ''slobodna'', odnosno tu je moguće smeštait nove promenljive neke nove funkcije. Sve rečeno se odnosi samo na funkcije za koje je izvorni k\^od poznat i napisan u programskim jezicima C i C++. Ono što se može desiti je da izvorni k\^od neke funkcije nije poznat uopšte, ili da je napisan u drugom programskom jeziku. Ukoliko se nešto ovako desi KLEE nije u mogućnosti da prati izvršavanje funkcije simbolički. U tim situacijama se argumenti konkretizuju na osnovu uslova koji važe na putanji gde se nalazi poziv funkcije i funkcije se jednostavno poziva i čuva se povratna vrednost ukoliko postoji. Ukoliko je funkcija bez povratne vrednosti pozvana samo se izvršava bez simboličkog praćenja i izvršavanje se nastavlja simbolički u okviru funkcije pozivaoca. 
+\indent Kada je reč o petljama KLEE ima prilično specifičan način rada. Naime, kako je alat potpuno simbolički, sve petlje se izvršavaju do kraja kroz sve potencijalne iteracije. Ako važi da je uslov izlaska iz petlje \texttt{i < n} gde je $n$ simbolička promenljiva, KLEE će pokušavati da prođe sve moguće iteracije. Ukoliko bi se znalo da je vrednost promenljive $n$ na primer $1000$ onda bi se petlja vrtela simbolički do vrednosti 1000. Međutim, kada je granica broja iteracija petlje simbolička promenljiva KLEE nema mogućnost da izvrti određen broj iteracija i vidi ponašanje programa, već se ide do maksimalne vrednosti koju može da čuva promenljiva tipa koji odgovara tipu promenljive $n$. Iz ovog razloga KLEE ima veliki problem sa petljama bez obzira na to koji se algoritam koristi. Često u okviru petlji postoje grananja što dovodi do toga da se kreira veliki broj novih stanja u okviru istih. Na ovaj način se i memorija brže puni što dovodi do potrebe za ranije opisanim odbacivanjem nekih stanja. Kada se govori o rekurzivnim funkcijama situacija je veoma slična. Rekurzija se ''vrti'' do uslova izlaska. Ukoliko uislov izlaska iz rekurzije zavisi od simboličke promenljive javlja se isti problem kao i pri radu sa petljama u okviru alata KLEE.
 
-\section{Rad sa pokazivačima u alatu KLEE}
+\section{Rad sa pokazivačima i nizovima}
 Rad sa pokazivačima se takođe ne razlikuje previše od onoga na šta smo navikli u programskom jeziku C. Postoji poseban deo memorije koji se zove \textit{Known Symbolics} gde se smeštaju promenljive poslate preko pokazivača. Kada je promenljiva prosleđena preko pokazivača funkciji nju je moguće menjati u okviru iste. Ako je u pitanju simbolička promenljiva potrebno je znati koja simbolička promenljiva se ''menja'', tj. koji dodatni uslovi za istu treba da važe. Zato postoji pomenuti deo simboličkog skladišta koji čuva sve simboličke promenljive koje su uvedene do tad. Objekat okazivačke promenljive koja se kreira prilikom poziva funkcije kao jedno od polja čuva i adresu promenljive na koju ''pokazuje''. Na taj način je moguće u okviru dela \textit{Known Symbolics} moguće menjati promenljivu, odnosno uslove koji važe za nju. Ukoliko je promenljiva koja se šalje preko pokazivača konkretna, onda se ''prati'' adresa u okviru konkretnog skladišta i vrednost konkretne promenljive se menja.
-\newpage
-
-\section{Nizovi u okviru alata KLEE}
 Rad sa nizovima dosta podseća na rad sa pokazivačima. Suština obe tehnike je ista. Postoji deo memorije gde se čuvaju simbolički nizovi. Kada se javi potreba za pristupom nekom elementu niza na osnovu indeksa, kao i kod programskog jezika C se to radi tako što se u odnosu na početak niza vrši pomeranje za određeni broj, tj. baš traženi indeks. Zavisno da li se radi o konkretnom ili simboličkom nizu, sve promenljive koje pripadaju istom se čuvaju u odgovarajućem skladištu (konkretnom odnosno simboličkom). Nakon što se javi potreba za pristupom $i$-tom elementu niza, određuje se njegova adresa, tj. kreira se pokazivač na taj element kako bi mu se pristupilo i kako bi eventualno mogao da bude izmenjen. Kao i kod pokazivačkih promenljivih (nizovi u suštini i jesu pokazivači) i kod nizova se elementi konkretnih nizova menjaju u konkretnom skladištu, a elementima simboličkih nizova se dodatna ograničenja dodaju u okviru \textit{Known Symbolics} dela simboličkog skladišta.  
 
-\section{Algoritmi pretrage stabla stanja u okviru alata KLEE}
+\section{Algoritmi pretrage stabla stanja}
 KLEE kao i većina drugih alata u okviru svoje implementacije sadrži vreći broj algoritama za pretragu grafa (stabla) stanja simboličkog izvršavanja. Alat se svrstava u grupu \textit{online} alata što znači da bez obzira na to koji se konkretan algoritam koristi za analizu nekog koda, sve putanje i sva stanja koja su vezana za njih će biti čuvani tokom izvršavanja (dok se putanja ne završi čime se brišu sva stanja vezana za nju pa i ona sama).\newline
 \\
 \textbf{DFS} je jedan od osnovnih algoritama pretrage grafa stanja u alatu KLEE. U pitanju je klasična pretraga grafa u dubinu. Ideja je istražiti jednu putanju do njenog samog kraja (završnog stanja ili dok se ne ispuni neki drugi uslov prekida istraživanja putanje), a zatim se vrši povratak na neko prethodno grananje gde se ide suprotnim putem od izabranog prilikom tog grananja (slično kao kod pretrage bilo kog grafa u dubinu). Ukoliko imamo stanje A u kome se vrši naredba grananja, u narednom koraku je potrebno da postoje dva stanja (B i C), jer postoji grananje koje može da odvede izvršavanje na dva različita puta. Interna implementacija algoritma pretrage u dubinu u okviru alata KLEE koristi \textit{std::vector<>} pokazivača na stanja izvršavanja (ExecutionState). Svaki put kada se naidje na grananje u stanju A vrši se dodavanje stanja C na kraj vektora, ali se stanje B ne kreira eksplicitno. Umesto toga KLEE vrši ''evoluciju'' stanja A. Ovom stanju se samo dodaju dodatna ograničenja koja treba važe u stanju B, menja se \textit{trenutna} naredba koja se izvršava u stanju da odgovara naredbi koja je trenutna u stanju B i menja se \textit{sledeća} naredba koja takođe odgovara novonastalom stanju. Dakle, jedno stanje evoluira i jedno stanje se dodaje dodaje na kraj vektora stanja svaki put kada imamo naredbu grananja. Kako bi se nad ovakvim grafom (na početku nemamo sve čvorove grafa, već se on formira dinamički) simulirala pretraga u dubinu uvek se za naredno stanje bira poslednje stanje iz vektora. Kasnije u tekstu će biti prikazan primer izvršavanja algoritma DFS gde će se videti kako se vrši simulacija navedenog algoritma. Ukoliko u nekom stanju nema naredbe grananja, vrši se samo ''evolucija'' stanja, tj. dodaju se nova ograničenja, menja se \textit{trenutna} i \textit{sledeća} naredba tog stanja i izvršavanje se nastavlja. Ovo stanje ne menja svoju poziciju u vektoru, već ostaje poslednje. Kada se dođe do završnog stanja ono se samo uklanja iz vektora stanja i uzima se poslednje stanje koje ostaje u vektoru kao naredno čime se nastavlja pretraga stabla u dubinu. Treba obratiti pažnju da iako je uobičajena implementacija DFS algoritma rekurzivna, u implementaciji u alatu KLEE nema rekurzije niti steka kojim bi se simulirala ista, već se algoritam simulira pomoću vektora na već opisani način.\newline
@@ -385,18 +382,23 @@ KLEE kao i većina drugih alata u okviru svoje implementacije sadrži vreći bro
 \end{itemize}
 Ovaj dodatak se može koristiti uz bilo koji od ranije navedenih algoritama, ali se najčešće koristi u kombinaciji sa algoritmom \textit{težinskog slučajnog biranja narednog stanja} i heuristikom \textit{udaljenost najbliže neotkrivene instrukcije}. U tom slučaju su dobijeni rezultati najbolji.
 
-\section{Primeri rada osnovnih algoritama u okviru alat KLEE}
-U ovom delu će biti prikazan rad algoritama DFS i BFS na jednom primeru. Razmotrimo sledeći primer:
+\section{Primeri rada osnovnih algoritama u okviru alata KLEE}
+U ovom delu će biti prikazan rad algoritama DFS i BFS na jednom primeru. Razmotrimo primer \ref{lst:primer_KLEE}:
 
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.69\linewidth]{stablo_primer_1.png}
+    \caption{Stablo stanja simboličkog izvršavanja koje odgovara primeru 2. Zelenom bojom su označena završna stanja.}
+    \label{fig:moj_primer}
+\end{figure}
+
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[caption={Primer simboličkog izvršavanja u alatu KLEE},captionpos=b,label={lst:primer_KLEE}]
-  void foo(int a) 
-  {
+  void foo(int a) {
     if (a > 1000) {
       a /= 2;
-
       if (a > 700) {
         a /= 2;
-
         if (a > 400) {
           a /= 2;
         }
@@ -406,7 +408,6 @@ U ovom delu će biti prikazan rad algoritama DFS i BFS na jednom primeru. Razmot
       }
       else {
         a *= 2;
-
         if (a < 1100) {
           return ;
         }
@@ -417,7 +418,6 @@ U ovom delu će biti prikazan rad algoritama DFS i BFS na jednom primeru. Razmot
     }
     else {
       a *= 2;
-
       if (a > 1200) {
         a /= 2;
 
@@ -441,13 +441,8 @@ U ovom delu će biti prikazan rad algoritama DFS i BFS na jednom primeru. Razmot
     }
   }
 \end{lstlisting}
+\end{minipage}
 \newpage
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.85\linewidth]{stablo_primer_1.png}
-    \caption{Stablo stanja simboličkog izvršavanja koje odgovara primeru 2. Zelenom bojom su označena završna stanja.}
-    \label{fig:moj_primer}
-\end{figure}
 
 \begin{figure}[ht]
     \centering
@@ -464,7 +459,7 @@ U ovom delu će biti prikazan rad algoritama DFS i BFS na jednom primeru. Razmot
     \caption{Pregled izgleda reda stanja tokom izvršavanja BFS algoritma. Zelenom bojom su prikazana završna stanja, a strelice predstavljaju ''evoluciju'' stanja.}
     \label{fig:DFS_stanja}
 \end{figure}
-\textbf{DFS} - kod izvršavanja algortima pretrage grafa u dubinu niz stanja se menja na drugačiji način u odnosu na pretragu grafa u širinu. U pitanju je drugačija priroda algoritma. Kod DFS-a se jedna putanja izučava do kraja pa se onda pretraga vraća na grananje gde se bira drugi put. Kod BFS-a se paralelno izučavaju sve putanje. Vidimo da se na početku kreće iz stanja 1 koje evoluira u stanje 2 i dodaje se novo stanje 3 na kraj vektora. Međutim onda se bira baš stanje 3, kao poslednje u vektoru kako bi se simulirala pretraga grafa u dubinu. Nakon toga stanje 3 evoluira u stanje 6 i dodaje se novo stanje 7, dok stanje 2 ostaje i dalje u vektoru ali na početku. Pretraga se nastavlja iz stanja 7 koje evoluira u stanje 14 i dodaje se stanje 15. Kako je sledeće stanje koje se izvršava broj 15, a ono je ujedno i završno stanje, samo se izbacuje iz vektora i prelazi se na stanje 14. Ono je takođe završno pa se pretraga vraća na stanje 6, čime se zapravo izvršio povratak na prethodno grananje (kod stanja 3 na slici). Iz stanja 6 se dobijaju 2 završna stanja, koja nakon izvršavanja bivaju izbačena iz vektora gde ostaje samo stanje 2. Primećujemo da je cela desna polovina stabla stanja izvršena, tj. istražene su sve putanje, pa se pretraga dalje na isti način fokusira na levu plovinu stabla. Iako je u pitanju DFS algoritam koji jednu putanju izvršava do kraja pre nego što pređe na narednu, primećujemo da se sve vreme čuvaju i stanja koja su vezana za putanje koje se ne izučavaju u tom trenutku. Razlog za to je taj što je KLEE \textit{online} alat, kao što je već rečeno ranije u tekstu.   
+\textbf{DFS} - kod izvršavanja algortima pretrage grafa u dubinu niz stanja se menja na drugačiji način u odnosu na pretragu grafa u širinu. U pitanju je drugačija priroda algoritma. Kod DFS-a se jedna putanja izučava do kraja pa se onda pretraga vraća na grananje gde se bira drugi put. Kod BFS-a se paralelno izučavaju sve putanje. Vidimo da se na početku kreće iz stanja 1 koje evoluira u stanje 2 i dodaje se novo stanje 3 na kraj vektora. Međutim onda se bira baš stanje 3, kao poslednje u vektoru kako bi se simulirala pretraga grafa u dubinu. Nakon toga stanje 3 evoluira u stanje 6 i dodaje se novo stanje 7, dok stanje 2 ostaje i dalje u vektoru ali na početku. Pretraga se nastavlja iz stanja 7 koje evoluira u stanje 14 i dodaje se stanje 15. Kako je sledeće stanje koje se izvršava broj 15, a ono je ujedno i završno stanje, samo se izbacuje iz vektora i prelazi se na stanje 14. Ono je takođe završno pa se pretraga vraća na stanje 6, čime se zapravo izvršio povratak na prethodno grananje (kod stanja 3 na slici). Iz stanja 6 se dobijaju 2 završna stanja, koja nakon izvršavanja bivaju izbačena iz vektora gde ostaje samo stanje 2. Primećujemo da je cela desna polovina stabla stanja izvršena, tj. istražene su sve putanje, pa se pretraga dalje na isti način fokusira na levu plovinu stabla. Iako je u pitanju DFS algoritam koji jednu putanju izvršava do kraja pre nego što pređe na narednu, primećujemo da se sve vreme čuvaju i stanja koja su vezana za putanje koje se ne izučavaju u tom trenutku. Razlog za to je taj što je KLEE \textit{online} alat, kao što je već rečeno u poglavlju \ref{alati_za_simbolicko}.
 % ------------------------------------------------------------------------------
 
 % ------------------------------------------------------------------------------
