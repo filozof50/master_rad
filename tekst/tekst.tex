@@ -120,13 +120,9 @@ Greške u softveru se neretko javljaju. Kako ljudi pišu softver, a ljudi greše
 
     \item \textbf{Ljubavni virus} - do današnjeg dana je ostao jedan od najrasprostranjenijih virusa i pokazao probleme koji ni danas nisu rešeni. Virus je prenošen preko mejla. Stizao je mejl sa naslovom ,,Volim te'' u kome je pisalo ,,Molim Vas pogledajte ljubavno pismo od mene Vama koje se nalazi u prilogu''. Otvaranjem priloga (eng. \textit{attachment} bi se otvorila tekstualna datoteka koja je zapravo bila izvršni fajl (eng. \textit{executable}) i isti mejl bi bio prosleđen svim kontaktima osobe koja je otvorila prilog. Na ovaj način se virus širio ekstremnom brzinom. Dodatna šteta koju je pravio je preimnovanje i brisanje ogromne količine datoteka u računaru. Na hiljade fajlova u mnogim računarima je zauvek nestalo. Procenjuje se da je ukupna šteta koju je naneo ovaj virus oko 10 milijardi dolara.
     
-    \item \textbf{Knight Capital Group} - kompanija je 2012 godine izgubila 460 miliona dolara za samo 45 minuta. Ova Američka kompanija se bavila finansijama i radom na berzi. 2012 je postojala izmena sistema i refaktorisanje koda istog. Kada je unapređen softver, trebalo je da bude prekopiran na svih 8 servera koje je posedovala ova kompanija. Međutim, inženjer koji je trebalo to da uradi je zaboravio da na jedan server prekopira novu verziju koda. Kompanija nije imala drugog inženjera koji bi proverio da li je sve u redu, niti softver koji je mogao da otkrije da je došlo do greške.
-    
     \item \textbf{Mt. Gox} - Japanski bitkoin (eng. \textit{bitcoin}) koji je nastao 2010 godine je bio najveći bitkoin na svetu. Nakon što je hakovan u junu 2011 gode, Mt. Gox je izgubio preko 850,000 bitkoina koji su u tom trenutku vredeli oko pola milijarde dolara. Ljudi iz kompanije su priznali da su ogromne gubitke pretrpeli zato što su imali grešku u bezbednosti sistema.
     
     \item \textbf{Ariane 5} - četvrtog juna 1996. godine raketa Arijana 5 (eng. \textit{Ariane 5}) je eksplodirala pri prvom lansiranju nakon samo 40 sekundi. Pravljenje softvera za raketu i same rakete je trajalo preko jedne decenije i koštalo je oko sedam milijardi dolara. Cena same rakete je bila oko 500 miliona dolara. Uzrok ove nezgode je bio greška u softveru. Naime, 64-bitni broj u pokretnom zarezu je zapisan u promenljivu koja je bila označeni ceo broj, koja može da čuva broj 32,767 kao najveći. Broj koji je trebalo da bude zapisan je bio veći od ove vrednosti i došli je do greške pri konverziji.
-    
-    \item \textbf{Dhahran raketa} - raketa Saudijske Arabije je 1991. godine ubila 28 američkih vojnika i povredila još 100 ljudi u gradu Dahran (eng. \textit{Dhahran}) u Zalivskom ratu. Problem je bio vreme odziva sistema. Prilikom računanja vremena odziva od trenutka paljenja odbrambenog sistema je decimalni broj bio ,,odsečen'' na 24. decimali. Množenjem sa velikim brojem se ova greška gomila i prestaje da bude zanemariva. Greška u softveru je dovela do toga da se odbrambeni sistem ne aktivira na vreme i došlo je do gubitaka ljudskih života.
     
     \item \textbf{Therac 25} - aparat za tretiranje raka radijacijom. Tokom prvih nekoliko godina od početka rada ovog uređaja 1983. godine nije bilo nikakvih problema. Međutim 1985. i 1986. godine se dogodilo ukupno 5 smrtnih slučajeva i jedan slučaj invaliditeta. Jedna od pacijenatkinja kojoj je bilo prepisano zračenje jačine 200 rada je bila ozračena jačinom između 10,000 i 20,000 rada.  
 
@@ -139,73 +135,6 @@ Postoje dva osnovna pristupa verifikaciji softvera. Statička i dinamička anali
 \subsection{Dinamička verifikacija softvera}
 Dinamička verifikacija softvera se odnosi na proveru ispravnosti softvera u fazi izvršavanja. Dakle, neophodno je kompajlirati k\^od, pokrenuti ga, i onda vršiti analizu. Dinamička verifikacija softvera se uglavnom sprovodi testiranjem. Testove uglavnom pišu i sprovode testeri, međutim u nekim situacijama to rade i programeri. Tester mora da ima znanje programiranja kako bi pisao kvalitetne testove, da poznaje specifičnosti jezika, da razume softver koji se razvija, njegove odlike, korisničke potrebe itd. Postoji više različitih vrsta i tehnika testiranja. 
 
-\subsubsection{Vrste testiranja}
-U ovom delu je dat pregled najčešće korišćenih vrsta testiranja u razvoju softvera.
-
-\paragraph{Testiranje jedinica koda} - podrazumeva testiranje manjih delova koda koji mogu da funkcionišu nezavisno. To može biti procedura, funkcija, klasa i slično. Ovaj vid testiranja se sprovodi konstantno i testove piše sam programer. Cilj jediničnih testova je da se omogući da i najsitnije celine koda imaju očekivanu funkcionalnost. Međusobna interakcija ovih jedinica se vrši drugim vrstama testiranja. U današnje vreme većina razvojnih okruženja ima podršku za pisanje jediničnih testova.
-
-\paragraph{Komponentno testiranje} - slično kao i testiranje jedinica koda. Razlika je u tome što komponente predstavljaju nešto veće celine. Jedna komponenta uglavnom predstavlja nekoliko jedinica koda koje su povezane u celinu. Komponente se testiraju slično kao i jedinice koda, odvojeno od ostatka sistema. Testiranje komponente se vrši odmah nakon njenog nastanka, što znači da se i ovaj vid testiranja vrši konstatno tokom razvoja softvera. Ove vrste testova mogu da sprovode i programeri i testeri.
-
-\paragraph{Integraciono testiranje} - testiranje većeg broja povezanih komponenti. Ovim testiranjem se proverava da li komponente komuniciraju na način na koji je to opisano u projektnoj dokumentaciji. Integraciono testiranje je na nešto višem nivou u odnosu na prethodna dva, jer proverava komunikaciju i interakciju između većeg broja komponenti, dok prethodno navedene vrste testiranja vrše izolaciju nekih funkcionalnosti sistema. Ove testove sprovodi tester.
-
-\paragraph{Sistemsko testiranje} - testiranje sistema kao celine. Provera da li sistem ispunjava sve predviđene zahteve i da li nema grešaka u radu sistema. U ovu vrstu testiranja se često uključuju i sledeće podvrste:
-
-\begin{description}
-    \item \textbf{Istraživačko testiranje} - ovom vrstom testiranja se proveravaju alternativni pravci upotrebe sistema. Pored osnovne funkcije koja je tražena projektnom specifikacijom, softver možda može biti korišćen i na drugačiji način. Ovom vrstom testiranja testeri upravo to proveravaju. Istraživačko testiranje se uglavnom koristi na kraju, kada je softver već gotov proizvod i kada je funkcionalna celina. 
-    
-    \item \textbf{Testovi prihvatljivosti} - testovi koje sprovodi klijent uz pomoć razvnojnog tima. Razvojni tim ima ulogu da razjasni neke tehničke detalje sistema ukoliko za tim ima potrebe. Klijent uglavnom proverava da li proizvod ispunjava njegove potrebe i očekivanja.
-\end{description}
-
-\paragraph{Regresiono testiranje} - testiranje koje se sprovodi nakon što dođe do nekih izmena u sistemu. Ovo testiranje je neophodno da bi se utvrdilo da neka izmena nije dovela do grešaka u nekim drugim delovima sistema koji nisu bili obuhvaćeni zahtevanom izmenom.
-
-\subsubsection{Tehnike testiranja}
-U ovom delu je dat pregled najčešće korišćenih tehnika testiranja u razvoju softvera.
-
-\paragraph{Testiranje metodom crne kutije} - poznato i kao \textit{testiranje ponašanja} (eng. \textit{Behavioral Testing}) je tehnika testiranja u kojoj interna implementacija i k\^od softvera nisu poznati testru. Kako tester ne zna za internu strukutru sistema za njega sistem predstavlja \textit{crnu kutiju} (eng. \textit{black box}), otuda potiče i naziv ove tehnike testiranja. Ovo tehnikom se uglavnom mogu otkriti sledeće greške:
-
-\begin{itemize}
-    \item Neispravne funkcionalnosti softvera.
-    
-    \item Greške u korisničkom interfejsu.
-    
-    \item Problemi s performansama.
-
-\end{itemize}
-
-Uglavnom se koristi u višim nivoima testiranja, recimo u sistemskom i integracionom testiranju.
-Neke od metoda za kreiranje testova ovom tehnikom su:
-
-\begin{description}
-    \item \textbf{Testiranje pomoću klasa ekvivalencije} - gde se podaci grupišu u neke skupove pri čemu podaci iz istog skupa treba da proizvedu isti rezultat. Očekivano je da ako jedan test slučaj iz neke klase ekvivalencije otkrije grešku, i \textit{\textbf{svi}} drugi test slučajevi iz iste klase ekvivalencije bi trebalo da otkriju istu grešku. Takođe, ako neki test slučaj ne otkriva grešku, \textit{\textbf{nijedan}} test slučaj iz iste klase ekvivalencije ne bi trebalo da otkrije grešku.
-    
-    \item \textbf{Testiranje graničnih vrednosti} - metod kod koga se podaci takođe dele u klase ekvivalencije. Zatim se bira jedan granični slučaj iz klase ekvivalencije, jedan slučaj iznad graničnog i jedna slučaj ispod graničnog. Nad njima se vrši testiranje. Zavisno od prirode podataka pojmovi \textit{iznad} i \textit{ispod} su relativni. Intuicija iza ove tehnike je da je čest slučaj da se greške dešavaju baš prilikom graničnih slučajeva, recimo korišćenje $>$ umesto $\geq$.
-    
-    \item \textbf{Dijagrami stanja} - tehnika testiranja metodom crne kutije u kojoj se kreiraju dijagrami koji opisuju na koji način sistem reaguje zavisno od spoljnih događaja. Koristi se uglavnom za sisteme koji zavise od nekih akcija koje su se već desile ili zavise od nekih spoljinih faktora. Dijagrami prikazuju stanja kroz koja sistem prolazi i koji su to događaji koji navode sistem na promenu stanja. Takođe se opisuju i akcije koje dovode do promene stanja (zavisno od događaja koji se desio, sistem preduzima  neku akciju i menja stanje).
-\end{description}
-
-Glavna prednost ove metode testiranja je što se testiranje vrši iz ugla korisnika, i što je testove moguće osmisliti čim je poznata specifikacija softvera. S druge strane, specifikacija se jako često menja i nije jasno definisana što ovaj vid testiranja čini nešto komplikovanijim. Takođe, nije moguće istražiti sve delove sistema ako nije poznata njegova interna implementacija.
-
-\paragraph{Testiranje metodom bele kutije} - je tehnika testiranja u kojoj su interna implementacija i k\^od softvera poznati onome ko vrši tesitranje. Ovu tehniku testiranja koriste i testeri ali programeri. Kako je poznat k\^od softvera, bira se putanja u kodu kojom treba da se prođe kako bi ona bila testirana. Na osnovu toga se dalje biraju ulazni podaci, i proverava se da li će izvršavanje programa dati očekivan rezultat. Pošto je k\^od poznat i moguće ga je videti, softver za onoga ko testira predstavlja \textit{belu kutiju} (eng. \textit{white box}), pa otuda i potiče naziv ove tehnike.
-
-Ova tehnika se češće upotrebljava na nižim nivoima testiranja (testiranje jedinice koda i integraciono testiranje), ali može se koristiti i prilikom sistemskog testiranja. 
-
-Idealno bi bilo kada bi bilo moguće ispitati sve moguće putanje kroz program. U praksi, zbog veličine i kompleksnosti softvera to nije moguće pa se teži da se maksimizuje pokrivenost koda:
-
-\begin{itemize}
-    \item Pokrivenost putanja - procenat putanja koje su izvršene barem jednom.
-    
-    \item Pokrivenost naredbi - procenat naredbi koje su izvršene barem jednom.
-    
-    \item Pokrivenost grana - procenat grana koje su izvršene barem jednom.
-    
-    \item Pokrivenost uslova - procenat uslova koji su izvršeni barem jednom.
-
-    \item Pokrivenost funckija - broj funkcija koje su pozvane barem jednom.
-
-\end{itemize}
-
-Prednosti ove tehnike su što se testiranje vrši tokom celog ciklusa razvoja softvera i što se zbog poznavanja implementacije može lakše testirati ponašanje koje korisniku nije vidljivo već predstavlja interni rad programa. Glavna mana je što je potrebno generisati dobre testove kako bi se maksimizovala pokrivenost koda, i potrebni su stručni ljudi koji razumeju principe razvoja softvera, njegove specifičnosti i specifičnosti jezika u kome se softver implementira kako bi testiranje bilo dovoljno kvalitetno.
-    
 \subsection{Statička verifikacija softvera}
 Statička verifikacija softvera se odnosi na proveru ispravnosti koda bez njegovog pokretanja. K\^od nije potrebno kompajlirati niti pokretati kako bi bile proverene eventualne greške u njemu. Postoje 2 načina statičke analize softvera.
 
