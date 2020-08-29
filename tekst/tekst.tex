@@ -43,11 +43,37 @@
 % Npr. \usepackage[b5paper,biblatex]{matfmaster}
 
 % Ostali paketi koji se koriste u dokumentu
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+}
 \usepackage{listings} % listing programskog koda
+\newtoggle{InString}{}% Keep track of if we are within a string
+\togglefalse{InString}% Assume not initally in string
+\newcommand*{\ColorIfNotInString}[1]{\iftoggle{InString}{#1}{\color{red}#1}}%
 \lstset { %
     language=C++,
     backgroundcolor=\color{black!5}, % set backgroundcolor
     basicstyle=\footnotesize,% basic font setting
+    keywordstyle=\color{magenta},
+    stringstyle=\color{red},
+    commentstyle=\color{green},
+    identifierstyle=\color{blue},
+    morecomment=[l][\color{magenta}]{\#},
+    literate = 
+    {0}{{{\ColorIfNotInString{0}}}}1
+    {1}{{{\ColorIfNotInString{1}}}}1
+    {2}{{{\ColorIfNotInString{2}}}}1
+    {3}{{{\ColorIfNotInString{3}}}}1
+    {4}{{{\ColorIfNotInString{4}}}}1
+    {5}{{{\ColorIfNotInString{5}}}}1
+    {6}{{{\ColorIfNotInString{6}}}}1
+    {7}{{{\ColorIfNotInString{7}}}}1
+    {8}{{{\ColorIfNotInString{8}}}}1
+    {9}{{{\ColorIfNotInString{9}}}}1
 }
 
 % Ime kandidata na srpskom jeziku (u odabranom pismu)
@@ -250,7 +276,7 @@ U stanju $G$ bi se ustanovilo da je sve u redu, tj. nema narušavanja ograničen
 Iako dinamičko simboličko izvršavanje počinje dodelom konkretnih vrednosti promenljivima, nove putanje se generišu negiranjem određenih uslova. Potrebno je odabrati uslov koje naredbe grananja će biti negiran. Broj naredbi grananja (samim tim i broj različitih putanja) u nekom kodu može biti jako veliki, s toga je neophodno na neki način vršiti odabir uslova koji će biti negirani jer je nemoguće u razumnom vremenu proći kroz sve putanje. Načini na koje različiti alati koji vrše dinamičko simboličko izvršavanje biraju koji će uslov biti negiran će biti diskutovan dalje u tekstu. 
 
 U nekim situacijama alat za simboličko izvršavanje koji radi na principu dinamičkog simboličkog izvršavanja ne može da isprati ceo k\^od simbolički. Razlog za to je što se u kodu može desiti da se pozivaju funkcije koje su deo neke eksterne biblioteke čiji izvorni k\^od nije dostupan. 
-Razmotrimo primer \ref{lst:eksterna_1}:
+Razmotrimo primer \ref{lst:eksterna_1}
 
 \bigbreak
     \begin{lstlisting}[caption={Primer gde rezultat izvršavanja eksterne funkcije nije važan},captionpos=b,label={lst:eksterna_1}]
@@ -322,14 +348,14 @@ Postoji veliki broj algoritama i heuristika koje koriste alati za simboličko iz
 
 \bigbreak
 
-\subsection{Pretraga grafa u dubinu}
+\subsection{Pretraga grafa u dubinu} \label{DFS}
 Jedan od osnovnih i najpoznatijih algoritama koji se koriste u simboličkom izvršavanju je pretraga grafa u dubinu (eng. \textit{Depth-First Search} ili $DFS$). Kako simboličko izvršavanje koda možemo predstaviti kao stablo stanja kroz koja se prolazi, a s obzirom da je stablo zapravo aciklički graf, možemo koristiti algoritme za pretragu grafova kako bismo birali sledeće stanje koje će biti izvršavano. Algoritam DFS bira putanju kojom kreće inicijalno, prilikom prvog grananja, zatim tu putanju istražuje do kraja. Ide maksimalno u dubinu sve dok se ne dođe do kraja putanje ili dok ne bude ispunjen neki drugi uslov zaustavljanja (dubina rekurzije, broj naredbi koje su izvršene na putanji, vreme koje je provedeno istražujući određenu putanju itd). Nakon toga algoritam vrši odsecanje te putanje, vraća se unazad do nekog prethodnog grananja i nastavlja drugim putem. Zatim se ta nova putanja istražuje maksimalno (do kraja, ili nekog drugog uslova izlaska). 
 
-Algoritam pretrage grafa u dubinu se obično koristi kada je memorija kojom se raspolaže ograničena (ne dovoljno velika za čuvanje velikog broja stanja). Najveća mana ovog pristupa je što jako dugo radi kada u kodu postoji rekurzivna funkcija koja se izvršava ili ukoliko postoje petlje čije ograničenje nisu konkretne vrednosti već simboličke promenljive. 
+Algoritam pretrage grafa u dubinu se obično koristi kada je memorija kojom se raspolaže ograničena (nedovoljno velika za čuvanje velikog broja stanja). Najveća mana ovog pristupa je što jako dugo radi kada u kodu postoji rekurzivna funkcija koja se izvršava ili ukoliko postoje petlje čije ograničenje nisu konkretne vrednosti već simboličke promenljive. 
 
 \bigbreak
 
-\subsection{Pretraga grafa u širinu} 
+\subsection{Pretraga grafa u širinu} \label{BFS}
 U simboličkom izvršavanju se za pretragu stabla stanja često koristi i drugi grafovski algoritam, pretraga grafa u širinu (eng. \textit{Breadth-First Search} ili $BFS$). Pretraga u širinu ima prednosti u odnosu na pretragu u dubinu jer paralelno izučava veliki broj putanja. Na ovaj način se mogu otkriti neka zanimljiva opažanja ranije u odnosu na pretragu u dubinu i češće se koristi ukoliko je vreme ograničeno (previše kratko da bi se čekalo da DFS pretraga istraži jednu po jednu putanju do kraja). 
 
 Mana ovog algoritma je to što čuva ogroman broj stanja i puni memoriju koja je dodeljena alatu za simboličko izvršavanje. Pošto se veliki broj putanja paralelno izučava potrebno je za sve njih čuvati stanja, formule logike prvog reda čija se zadovoljivost proverava SMT rešavačem (ograničenja koja važe za svaku od putanja), održavati simbolički memorijski prostor i slično. Iz navedenih razloga je potrošnja memorije znatno veća u odnosu na algoritam pretrage u dubinu. Još jedna mana ovog pristupa je što nije realno očekivati da sve putanje mogu biti izučene do kraja. Vreme je često ograničavajući faktor kada govorimo o analizi realnog softvera gde postoji jako veliki broj linija koda pa u tim situacijama algoritam pretrage u širinu ne uspeva da izuči sve putanje do kraja. Međutim, činjenica je da se paralelnim izučavanjem većeg broja putanja lakše i brže dolazi do interesantnih zapažanja u odnosu na pretragu u dubinu.
@@ -436,21 +462,41 @@ Rad sa nizovima podseća na rad sa pokazivačima. Suština obe tehnike je ista. 
 \section{Algoritmi pretrage stabla stanja}
 KLEE kao i većina drugih alata u okviru svoje implementacije sadrži vreći broj algoritama za pretragu grafa (stabla) stanja simboličkog izvršavanja. Alat se svrstava u grupu \textit{online} alata što znači da bez obzira na to koji se konkretan algoritam koristi za analizu nekog koda, sve putanje i sva stanja koja su vezana za njih će biti čuvani tokom izvršavanja (dok se putanja ne završi čime se brišu sva stanja vezana za nju pa i ona sama).
 
-\subsection{DFS}
-Jedan od osnovnih algoritama pretrage grafa stanja u alatu KLEE je DFS algoritam. U pitanju je tradicionalna pretraga grafa u dubinu. Ideja je istražiti jednu putanju do njenog samog kraja (završnog stanja ili dok se ne ispuni neki drugi uslov prekida istraživanja putanje), a zatim se vrši povratak na neko prethodno grananje gde se ide suprotnim putem od izabranog prilikom tog grananja (slično kao kod pretrage bilo kog grafa u dubinu). Ukoliko imamo stanje A u kome se vrši naredba grananja, u narednom koraku je potrebno da postoje dva stanja (B i C), jer postoji grananje koje može da odvede izvršavanje na dva različita puta. Interna implementacija algoritma pretrage u dubinu u okviru alata KLEE koristi \textit{std::vector<>} pokazivača na stanja izvršavanja (ExecutionState). Svaki put kada se naidje na grananje u stanju A vrši se dodavanje stanja C na kraj vektora, ali se stanje B ne kreira eksplicitno. Umesto toga KLEE vrši ,,evoluciju'' stanja A. Ovom stanju se samo dodaju dodatna ograničenja koja treba važe u stanju B, menja se \textit{trenutna} naredba koja se izvršava u stanju da odgovara naredbi koja je trenutna u stanju B i menja se \textit{sledeća} naredba koja takođe odgovara novonastalom stanju. Dakle, jedno stanje evoluira i jedno stanje se dodaje dodaje na kraj vektora stanja svaki put kada imamo naredbu grananja. Kako bi se nad ovakvim grafom (na početku nemamo sve čvorove grafa, već se on formira dinamički) simulirala pretraga u dubinu uvek se za naredno stanje bira poslednje stanje iz vektora. Kasnije u tekstu će biti prikazan primer izvršavanja algoritma DFS gde će se videti kako se vrši simulacija navedenog algoritma. Ukoliko u nekom stanju nema naredbe grananja, vrši se samo ,,evolucija'' stanja, tj. dodaju se nova ograničenja, menja se \textit{trenutna} i \textit{sledeća} naredba tog stanja i izvršavanje se nastavlja. Ovo stanje ne menja svoju poziciju u vektoru, već ostaje poslednje. Kada se dođe do završnog stanja ono se samo uklanja iz vektora stanja i uzima se poslednje stanje koje ostaje u vektoru kao naredno čime se nastavlja pretraga stabla u dubinu. Treba obratiti pažnju da iako je uobičajena implementacija DFS algoritma rekurzivna, u implementaciji u alatu KLEE nema rekurzije niti steka kojim bi se simulirala ista, već se algoritam simulira pomoću vektora na već opisani način.
+\subsection{Specifičnosti pretrage grafa u dubinu u alatu KLEE}
+Jedan od osnovnih algoritama pretrage grafa stanja u alatu KLEE je algoritam pretarge grafa u dubinu, odnosno DFS. U pitanju je tradicionalna pretraga grafa u dubinu. Ideja algoritma u simboličkom izvršavanju je opisana u \ref{DFS}.
 
-\subsection{BFS} 
-Još jedan osnovni algoritam kako pretrage grafova (samim tim i stabala), tako i pretrage stabla stanja u alatima za simboličko izvršavanje je BFS. Za razliku od pretrage grafa u dubinu, ideja pretrage u širinu je, baš kao i kod svakog grafa, da se što veći broj putanja izučava odjednom, odnosno da se izvršavaju sva stanja koja su na jednom nivou stabla, a nakon što se sva stanja sa nekog nivoa izvrše prelazi se na naredni nivo. Ovaj pristup ima prednost u odnosu na prethodni jer ima potencijala da otkrije veći broj zanimljivih stanja i pojava u kodu u ranim fazama putanja. Zamislimo recimo da imamo potpuno binarno stablo.\footnote[3]{Svi čvorovi osim listova imaju tačno dva potomka}. Neka se izvršavanje nalazi na nivou dva gde imamo osam čvorova (stanja). Dodatno, neka je memorija ograničavajući faktor u toj meri da neka stanja moraju biti odbačena jer je nema dovoljno da se izvrši sve do kraja. Zamislimo da na narednom nivou nakon grananja prvog stanja (krajnji levi čvor na nivou) može doći do greške u ,,evoluiranom'' stanju. DFS neće biti u stanju da pronađe ovu grešku jer će birati uvek poslednje stanje i kretaće se njime do samog kraja. S druge strane, BFS algoritam će izvršti svih osam stanja drugog nivoa i nakon toga će biti u stanju da već kod narednog stanja (,,evoluiranog'') pronađe grešku. U alatu KLEE interna implementacija algoritma pretrage u širniu koristi \textit{std::deque<>} pokazivača na stanja koja se izvršavaju (ExecutionState), kako bi operacije skidanja sa početka i dodavanja na kraj bile efikasne. Slično kao kod algoritma DFS, i BFS samo vrši ,,evoluciju'' stanja kada dođe do grananja. Ako postoji stanje A u kome se vrši grananje, u sledećem koraku treba da postoje stanja B i C. Stanje B će biti zapravo samo ,,evoluirano'' stanje A kome su dodata nova ograničenja, i promenjene \textit{trenutna} i \textit{naredna} instrukcija koje se izvršavaju, dok će stanje C biti novo stanje koje se kreira i dodaje na \textbf{kraj} reda stanja kao što se to i obično radi kod algoritma pretrage grafa u širinu. Ukoliko u stanju nema grananja, ono će samo ,,evoluirati'' u novo stanje dodavanjem ograničenja i menjanjem odgovarajućih instrukcija kao i u algoritmu pretragu u dubinu. Razlika u odnosu na algoritam DFS je ta što ,,evoluirano'' stanje neće ostati na istoj poziciji u redu stanja već će se prebaciti na kraj reda kako bi sva ostala stanja na istom nivou u stablu bila izvršena pre njega. Ovim postupkom ovo stanje ,,prelazi'' u naredni nivo što i jeste očekivano ponašanje. 
+Ukoliko imamo stanje A u kome se vrši naredba grananja, u narednom koraku je potrebno da postoje dva stanja (B i C), jer postoji grananje koje može da odvede izvršavanje na dva različita puta. Interna implementacija algoritma pretrage u dubinu u okviru alata KLEE koristi niz pokazivača na stanja izvršavanja. Svaki put kada se naiđe na grananje u stanju A vrši se dodavanje stanja C na kraj niza, ali se stanje B ne kreira eksplicitno. Umesto toga KLEE vrši ,,evoluciju'' stanja A. Ovom stanju se samo dodaju dodatna ograničenja koja treba važe u stanju B, menja se \textit{trenutna} naredba koja se izvršava u stanju da odgovara naredbi koja je trenutna u stanju B i menja se \textit{sledeća} naredba koja takođe odgovara novonastalom stanju. Dakle, jedno stanje evoluira i jedno stanje se dodaje na kraj niza stanja svaki put kada imamo naredbu grananja. 
+
+Kako bi se nad ovakvim grafom (na početku nemamo sve čvorove grafa, već se on formira dinamički) vršila pretraga u dubinu, uvek se za naredno stanje bira poslednje stanje iz niza. U delu \ref{osnovni_algoritmi} će biti prikazan primer izvršavanja algoritma DFS gde će se videti kako ovaj algoritam radi u alatu KLEE. 
+
+Ukoliko u nekom stanju nema naredbe grananja, vrši se samo ,,evolucija'' stanja, tj. dodaju se nova ograničenja, menja se \textit{trenutna} i \textit{sledeća} naredba tog stanja i izvršavanje se nastavlja. Ovo stanje ne menja svoju poziciju u nizu, već ostaje poslednje. Kada se dođe do završnog stanja ono se samo uklanja iz niza stanja i uzima se poslednje stanje koje ostaje u nizu kao naredno čime se nastavlja pretraga stabla u dubinu. Uobičajena implementacija algoritma DFS je rekurzivna. U implementaciji u alatu KLEE nema rekurzije niti steka kojim bi se simulirala ista, već se algoritam niza pomoću niza na već opisani način.
+
+\subsection{Specifičnosti pretrage grafa u širinu u alatu KLEE} 
+Pored pretrage grafa u dubinu u alatu KLEE je implementirana i pretraga grafa u širinu, odnosno BFS. Karakteristike ovog algoritma u kontekstu simboličkog izvršavanja su opisane u \ref{BFS}.
+
+Neka je stablo stanja potpuno binarno stablo.\footnote[3]{Svi čvorovi osim listova imaju tačno dva potomka}. Neka se izvršavanje nalazi na nivou dva gde imamo osam čvorova (stanja). Dodatno, neka je memorija ograničavajući faktor u toj meri da neka stanja moraju biti odbačena jer je nema dovoljno da se izvrši sve do kraja. Neka na narednom nivou nakon grananja prvog stanja (krajnji levi čvor na nivou) može doći do greške u ,,evoluiranom'' stanju. DFS neće biti u stanju da pronađe ovu grešku jer će birati uvek poslednje stanje i kretaće se njime do samog kraja. S druge strane, BFS algoritam će izvršti svih osam stanja drugog nivoa i nakon toga će biti u stanju da već kod narednog stanja (,,evoluiranog'') pronađe grešku. 
+
+U alatu KLEE interna implementacija algoritma pretrage u širinu koristi dek pokazivača na stanja koja se izvršavaju, kako bi operacije skidanja sa početka i dodavanja na kraj bile efikasne. Slično kao kod algoritma DFS, i BFS samo vrši ,,evoluciju'' stanja kada dođe do grananja. Ako postoji stanje A u kome se vrši grananje, u sledećem koraku treba da postoje stanja B i C. Stanje B će biti zapravo samo ,,evoluirano'' stanje A kome su dodata nova ograničenja, i promenjene \textit{trenutna} i \textit{naredna} instrukcija koje se izvršavaju, dok će stanje C biti novo stanje koje se kreira i dodaje na \textbf{kraj} reda stanja kao što se to i obično radi kod algoritma pretrage grafa u širinu. 
+
+Ukoliko u stanju nema grananja, ono će samo ,,evoluirati'' u novo stanje dodavanjem ograničenja i menjanjem odgovarajućih instrukcija kao i u algoritmu pretragu u dubinu. Razlika u odnosu na algoritam DFS je ta što ,,evoluirano'' stanje neće ostati na istoj poziciji u redu stanja već će se prebaciti na kraj reda kako bi sva ostala stanja na istom nivou u stablu bila izvršena pre njega. Ovim postupkom ovo stanje ,,prelazi'' u naredni nivo što i jeste očekivano ponašanje. 
 
 \subsection{Slučajan odabir narednog stanja} 
-Verovatno i najjednostavniji ali retko korišćen algoritam za pretragu stabla stanja je algoritam slučajnog odabira narednog stanja. Naredno stanje koje će biti izvršeno se bira slučajno (eng. \textit{random}) iz skupa dostupnih stanja. Interna implementacija ovog algoritma čuva pokazivače na stanja u vektoru (\textit{std::vector<>}). Kao i kod ostalih stanja ako postoji grananje, trenutno stanje ,,evoluira'' i dodaje se jedno novo. Ukoliko ne postoji grananje samo se dodaje jedno novo stanje na kraj vektora stanja. Generisanjem pseudo-slučajnog broja u intervalu $[0 - n $-$ 1]$ gde je $n$ trenutni broj stanja u vektoru stanja se bira naredno stanje koje se izvršava, bez ikakvog pravila.
+Verovatno najjednostavniji ali retko korišćen algoritam za pretragu stabla stanja je algoritam slučajnog odabira narednog stanja. Naredno stanje koje će biti izvršeno se bira slučajno (eng. \textit{random}) iz skupa dostupnih stanja. Interna implementacija ovog algoritma čuva pokazivače na stanja u nizu. 
+
+Kao i kod ostalih algoritama, ako postoji grananje, trenutno stanje ,,evoluira'' i dodaje se jedno novo. Ukoliko ne postoji grananje, samo se vrši ,,evoluicija'' trenutnog stanje. Generisanjem pseudo-slučajnog broja iz intervala $[0, ..., n $-$ 1]$ gde je $n$ trenutni broj stanja u nizu stanja se bira naredno stanje koje se izvršava.
 
 \subsection{Težinsko slučajno biranje narednog stanja} 
-Nešto napredniji algoritam pretrage grafa stanja u odnosu na prethodno navedene je algoritam težinskog slučajnog biranja narednog stanja. Osnovna ideja ovog algoritma je da se svakom stanju koje treba da bude izvršeno dodeljuje težina prema odabranoj heuristici. Intera implmentacija ovog algoritma koristi implementaciju crveno crnog stabla koja je implementirana u okviru alata. U ovoj strukturi podatakase čuvaju pokazivači na stanja koja se izvršavaju. Kao i kod ostalih algoritama ukoliko postoji grananje u nekom stanju ono ,,evoluira'' i dodaje se jedno novo stanje, a ukoliko nema grananja trenutnom stanju se menjaju \textit{trenutna} i \textit{sledeća} naredba, kao i formula logike prvog reda $\pi$ koja čuva ograničenja koja važe u stanju tj. putanji kojoj stanje pripada. Svako od stanja dobija određenu težinu zavisno od heuristike koja se koristi i stanja se u stablo ubacuju na osnovu težine, i to tako što se pri ubacivanju stanja ono smešta u list a zatim zavisno od pozicije \textit{crvenih} i \textit{crnih} čvorova može doći do rotacija čvorova unutar stabla. Svaki put kada se neko stanje doda u stablo, njegova težina se propagira uz put kojim se došlo do pozicije na kojoj se čvor smestio u stablu. Samim tim koren stabla čuva sumu svih težina čvorova u stablu. Izbor narednog stanja koje će se stanje izvršavati se vrši slučajnim izborom. Najpre se genriše slučajan broj $p$ iz intervala $[0, 1)$. Zatim se težina korena pomnoži ovom vrednošću čime se dobija težina $w$. Dok god postoji levi sin i njegova težina je veća od $w$ ide se levo niz stablo. Ukoliko je $w$ veće od težine u levom sinu $w$ se smanjuje za tu vrednost. Ukoliko se dođe do čvora u kojima važi $w < w_n$ pri čemu $w_n$ predstavlja težinu trenutnog čvora kažemo da baš taj čvor čuva stanje koje se naredno izvršava. Inače, ide se desno niz stablo pri čemu se vrednost $w$ pri svakom spuštanju umanjuje za težinu desnog potomka u koji se pretraga spušta. Detaljinije o operacijama dodavanja i biranja narednog stanja se može naći u \cite{klee}. Heursitke koje postoje u okviru alata KLEE su:
+Nešto napredniji algoritam pretrage grafa stanja u odnosu na prethodno navedene je algoritam težinskog slučajnog biranja narednog stanja. Osnovna ideja ovog algoritma je da se svakom stanju koje treba da bude izvršeno dodeljuje težina prema odabranoj heuristici. 
+
+Interna implementacija ovog algoritma koristi implementaciju crveno crnog stabla koja je implementirana u okviru alata. U ovoj strukturi podataka se čuvaju pokazivači na stanja koja se izvršavaju. 
+
+Slično kao i u drugim algoritmima u okviru alata KLEE, ukoliko postoji grananje u nekom stanju ono ,,evoluira'' i dodaje se jedno novo stanje, a ukoliko nema grananja trenutnom stanju se menjaju \textit{trenutna} i \textit{sledeća} naredba, kao i formula logike prvog reda $\pi$ koja čuva ograničenja koja važe u stanju tj. putanji kojoj stanje pripada. Svako od stanja dobija određenu težinu zavisno od heuristike koja se koristi i stanja se u stablo ubacuju na osnovu težine, i to tako što se pri ubacivanju stanja ono smešta u list a zatim zavisno od pozicije \textit{crvenih} i \textit{crnih} čvorova može doći do rotacija čvorova unutar stabla. Svaki put kada se neko stanje doda u stablo, njegova težina se propagira uz put kojim se došlo do pozicije na kojoj se čvor smestio u stablu. Samim tim koren stabla čuva sumu svih težina čvorova u stablu. 
+
+Izbor narednog stanja koje će se stanje izvršavati se vrši slučajnim izborom. Najpre se genriše slučajan broj $p$ iz intervala $[0, 1)$. Zatim se težina korena pomnoži ovom vrednošću čime se dobija težina $w$. Dok god postoji levi sin i njegova težina je veća od $w$ ide se levo niz stablo. Ukoliko je $w$ veće od težine u levom sinu $w$ se smanjuje za tu vrednost. Ukoliko se dođe do čvora u kojima važi $w < w_n$ pri čemu $w_n$ predstavlja težinu trenutnog čvora kažemo da baš taj čvor čuva stanje koje se naredno izvršava. Inače, ide se desno niz stablo pri čemu se vrednost $w$ pri svakom spuštanju umanjuje za težinu desnog potomka u koji se pretraga spušta. Detaljinije o operacijama dodavanja i biranja narednog stanja se može naći u \cite{klee}. Heursitke koje postoje u okviru alata KLEE su:
 \begin{description}
     \item\textbf{Dubina stanja} - težina stanja se određuje kao dubina na kojoj se nalazi stanje, tj. nivo u stablu na kom se nalazi čvor koji čuva odgovarajuće stanje.
     
-    \item\textbf{RP} - težina stanja se određuje kao $(\frac{1}{2}) ^ d$ gde je $d$ nivo stabla na kom se nalazi stanje.
+    \item\textbf{Slučajan odabir putanje} - težina stanja se određuje kao $(\frac{1}{2}) ^ d$ gde je $d$ nivo stabla na kom se nalazi stanje.
     
     \item\textbf{Broj instrukcija} - heuristika koja stanju dodeljuje težinu na osnovu broja instrukcija koje su izvršene da bi se do njega došlo.
     
@@ -461,8 +507,8 @@ Nešto napredniji algoritam pretrage grafa stanja u odnosu na prethodno navedene
 
 \bigskip
 
-\subsection{Batch pretraga} 
-Batch pretraga predstavlja dodatak bilo kom od prethodno navedenih algoritama. Postoje dva dodatka:
+\subsection{Dodaci pretrazi} 
+Beč (eng. \textit{Batch}) predstavlja dodatak bilo kom od prethodno navedenih algoritama. Postoje dva dodatka:
 \begin{itemize}
     \item Ako određeni broj instrukcija bude izvršen bez otkrivanja nove instrukcije, pređi na neku drugu putanju.
     
@@ -472,15 +518,15 @@ Ovaj dodatak se može koristiti uz bilo koji od ranije navedenih algoritama, ali
 
 \newpage
 
-\section{Primeri rada osnovnih algoritama u okviru alata KLEE}
-U ovom delu će biti prikazan rad algoritama DFS i BFS na jednom primeru. Razmotrimo primer \ref{lst:primer_KLEE}:
+\section{Primeri rada osnovnih algoritama u okviru alata KLEE} \label{osnovni_algoritmi}
+U ovom delu će biti prikazan rad algoritama DFS i BFS na jednom primeru. Razmotrimo primer koji je dat u listingu \ref{lst:primer_KLEE}
 
 \vskip 1.5in
 
 \begin{figure}[ht]
     \centering
     \includegraphics[width=\linewidth]{stablo_primer_1.png}
-    \caption{Stablo stanja simboličkog izvršavanja koje odgovara primeru 2. Zelenom bojom su označena završna stanja.}
+    \caption{Stablo stanja simboličkog izvršavanja koje odgovara primeru \ref{lst:primer_KLEE}. Zelenom bojom su označena završna stanja.}
     \label{fig:moj_primer}
 \end{figure}
 
@@ -538,19 +584,18 @@ U ovom delu će biti prikazan rad algoritama DFS i BFS na jednom primeru. Razmot
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.75\linewidth]{BFS_stanja_1.png}
-    \caption{Pregled izgleda vektora stanja tokom izvršavanja DFS algoritma. Zelenom bojom su prikazana završna stanja, a strelice predstavljaju ,,evoluciju'' stanja.}
+    \caption{Pregled izgleda niza stanja tokom izvršavanja DFS algoritma. Zelenom bojom su prikazana završna stanja, a strelice predstavljaju ,,evoluciju'' stanja.}
     \label{fig:BFS_stanja}
 \end{figure}
 \bigbreak
-\paragraph{BFS} - Ako pogledamo kako se menja red koji čuva stanja koja se izvršavaju vidimo da se kreće iz stanja 1. Zatim stanje 1 ,,evoluira'' u stanje 2 i na kraj reda se dodaje stanje 3. Sledeće stanje koje se uzima je upravo 2, koje dalje ,,evoluira'' u stanje 4. Takođe se dodaje novo stanje 5. Stanje 3 mora da ostane na početku reda kako bi bilo naredno izvršeno jer je u pitanju algoritam BFS i potrebno je prvo izvršiti sva stanja na jedno nivou stabla, pa tek onda preći na naredni. Od stanja 3 se dobijaju stanja 6 i 7 koji idu na kraj reda. Sledeće stanje koje se izvršava je 4, od koga nastaju 8 i 9. Postupak se nastavlja na prikazani način sve dok u redu ne ostanu samo završna stanja (8 - 15). U tom trenutku će se sva završna stanja izvršiti redom i biti izbacivana iz reda u redosledu izvršavanja. Pošto iz završnog stanja nema gde da se ode dalje, ono se samo izbacuje, time se putanja završava i prelazi se na naredno stanje koje treba izvršiti. 
-
+\paragraph{DFS} - na slici \ref{fig:BFS_stanja} je prikazano na koji način se menja niz stanja izvršavanjem algoritma pretrage stabla stanja u dubinu. Stanja odgovaraju primeru \ref{lst:primer_KLEE}.  Sa slike v   idimo da se na početku kreće iz stanja 1 koje evoluira u stanje 2 i dodaje se novo stanje 3 na kraj niza. Međutim onda se bira baš stanje 3, kao poslednje u nizu kako bi se simulirala pretraga grafa u dubinu. Nakon toga stanje 3 evoluira u stanje 6 i dodaje se novo stanje 7, dok stanje 2 ostaje i dalje u nizu ali na početku. Pretraga se nastavlja iz stanja 7 koje ,,evoluira'' u stanje 14 i dodaje se stanje 15. Kako je sledeće stanje koje se izvršava broj 15, a ono je ujedno i završno stanje, samo se izbacuje iz niza i prelazi se na stanje 14. Ono je takođe završno pa se pretraga vraća na stanje 6, čime se zapravo izvršio povratak na prethodno grananje (kod stanja 3 na slici). Iz stanja 6 se dobijaju 2 završna stanja, koja nakon izvršavanja bivaju izbačena iz niza gde ostaje samo stanje 2. Primećujemo da je cela desna polovina stabla stanja izvršena, tj. istražene su sve putanje, pa se pretraga dalje na isti način fokusira na levu plovinu stabla. Iako je u pitanju DFS algoritam koji jednu putanju izvršava do kraja pre nego što pređe na narednu, primećujemo da se sve vreme čuvaju i stanja koja su vezana za putanje koje se ne izučavaju u tom trenutku.
 \begin{figure}[ht]
     \centering
     \includegraphics[height=0.8\linewidth]{DFS_states_1.png}
     \caption{Pregled izgleda reda stanja tokom izvršavanja BFS algoritma. Zelenom bojom su prikazana završna stanja, a strelice predstavljaju ,,evoluciju'' stanja.}
     \label{fig:DFS_stanja}
 \end{figure}
-\paragraph{DFS} - kod izvršavanja algortima pretrage grafa u dubinu niz stanja se menja na drugačiji način u odnosu na pretragu grafa u širinu. U pitanju je drugačija priroda algoritma. Kod DFS-a se jedna putanja izučava do kraja pa se onda pretraga vraća na grananje gde se bira drugi put. Kod BFS-a se paralelno izučavaju sve putanje. Vidimo da se na početku kreće iz stanja 1 koje evoluira u stanje 2 i dodaje se novo stanje 3 na kraj vektora. Međutim onda se bira baš stanje 3, kao poslednje u vektoru kako bi se simulirala pretraga grafa u dubinu. Nakon toga stanje 3 evoluira u stanje 6 i dodaje se novo stanje 7, dok stanje 2 ostaje i dalje u vektoru ali na početku. Pretraga se nastavlja iz stanja 7 koje ,,evoluira'' u stanje 14 i dodaje se stanje 15. Kako je sledeće stanje koje se izvršava broj 15, a ono je ujedno i završno stanje, samo se izbacuje iz vektora i prelazi se na stanje 14. Ono je takođe završno pa se pretraga vraća na stanje 6, čime se zapravo izvršio povratak na prethodno grananje (kod stanja 3 na slici). Iz stanja 6 se dobijaju 2 završna stanja, koja nakon izvršavanja bivaju izbačena iz vektora gde ostaje samo stanje 2. Primećujemo da je cela desna polovina stabla stanja izvršena, tj. istražene su sve putanje, pa se pretraga dalje na isti način fokusira na levu plovinu stabla. Iako je u pitanju DFS algoritam koji jednu putanju izvršava do kraja pre nego što pređe na narednu, primećujemo da se sve vreme čuvaju i stanja koja su vezana za putanje koje se ne izučavaju u tom trenutku. Razlog za to je taj što je KLEE \textit{online} alat, kao što je već rečeno u poglavlju \ref{alati_za_simbolicko}.
+\paragraph{BFS} - zbog drugačije prirode algoritma i niz stanja se prilikom pretrage stabla stanja u širinu menja u drugačije u odnosnu na pretragu u dubinu. Ako pogledamo kako se na slici \ref{fig:BFS_stanja} menja red koji čuva stanja koja se izvršavaju vidimo da se kreće iz stanja 1. Zatim stanje 1 ,,evoluira'' u stanje 2 i na kraj reda se dodaje stanje 3. Sledeće stanje koje se uzima je upravo 2, koje dalje ,,evoluira'' u stanje 4. Takođe se dodaje novo stanje 5. Stanje 3 mora da ostane na početku reda kako bi bilo naredno izvršeno jer je u pitanju algoritam BFS i potrebno je prvo izvršiti sva stanja na jedno nivou stabla, pa tek onda preći na naredni. Od stanja 3 se dobijaju stanja 6 i 7 koji idu na kraj reda. Sledeće stanje koje se izvršava je 4, od koga nastaju 8 i 9. Postupak se nastavlja na prikazani način sve dok u redu ne ostanu samo završna stanja (8 - 15). U tom trenutku će se sva završna stanja izvršiti redom i biti izbacivana iz reda u redosledu izvršavanja. Pošto iz završnog stanja nema gde da se ode dalje, ono se samo izbacuje, time se putanja završava i prelazi se na naredno stanje koje treba izvršiti. 
 % ------------------------------------------------------------------------------
 
 % ------------------------------------------------------------------------------
