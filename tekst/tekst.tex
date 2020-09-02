@@ -134,11 +134,11 @@ Greške u softveru se neretko javljaju. Kako ljudi pišu softver, greške su nem
 
 \begin{description}
 
-    \item \textbf{Mt. Gox} \cite{software_erros} - Japanski bitkoin (eng. \textit{bitcoin}) koji je nastao 2010 godine je bio najveći bitkoin na svetu. Nakon što je probijen njegov bezbednosni sistem u junu 2011 godine, Mt. Gox je izgubio preko 850,000 bitkoina koji su u tom trenutku vredeli oko pola milijarde dolara. Ljudi iz kompanije su priznali da su ogromne gubitke pretrpeli zato što su imali grešku u bezbednosnom sistemu ovog bitkoina.
+    \item \textbf{Mt. Gox} \cite{software_erros} - Japanski bitkoin (eng. \textit{bitcoin}) koji je nastao 2010. godine je bio najveći bitkoin na svetu. Nakon što je probijen njegov bezbednosni sistem u junu 2011. godine, Mt. Gox je izgubio preko 850,000 bitkoina koji su u tom trenutku vredeli oko pola milijarde dolara. Ljudi iz kompanije su priznali da su ogromne gubitke pretrpeli zato što su imali grešku u bezbednosnom sistemu ovog bitkoina.
     
     \item \textbf{Ariane 5} \cite{arriane_5} - četvrtog juna 1996. godine raketa Arijana 5 (eng. \textit{Ariane 5}) je eksplodirala pri prvom lansiranju nakon samo 40 sekundi. Pravljenje softvera za raketu i same rakete je trajalo preko jedne decenije i koštalo je oko sedam milijardi dolara, a cena rakete je bila oko 500 miliona dolara. Uzrok ove nezgode je bio greška u softveru. Naime, 64-bitni broj u pokretnom zarezu je zapisan u promenljivu koja je bila označeni ceo broj, koja može da čuva broj 32,767 kao najveći. Broj koji je trebalo da bude zapisan je bio veći od ove vrednosti i došlo je do greške pri konverziji.
     
-    \item \textbf{Therac 25} \cite{therac_25} - je bio aparat koji se koristio tretiranje raka radijacijom. Tokom prvih nekoliko godina od početka rada ovog uređaja 1983. godine nije bilo nikakvih problema. Međutim 1985. i 1986. godine se dogodilo ukupno 5 smrtnih slučajeva i jedan slučaj invaliditeta. Jedna od pacijenatkinja kojoj je bilo prepisano zračenje jačine 200 rada je bila ozračena jačinom između 10,000 i 20,000 rada.  
+    \item \textbf{Therac 25} \cite{therac_25} - je bio aparat koji se koristio tretiranje raka radijacijom. Tokom prvih nekoliko godina od početka rada ovog uređaja 1983. godine nije bilo nikakvih problema. Međutim 1985. i 1986. godine se dogodilo ukupno pet smrtnih slučajeva i jedan slučaj invaliditeta. Jedna od pacijenatkinja kojoj je bilo prepisano zračenje jačine 200 rada je bila ozračena jačinom između 10,000 i 20,000 rada.  
 
 \end{description}
 
@@ -161,11 +161,12 @@ Statička verifikacija softvera se odnosi na proveru ispravnosti koda bez njegov
 
     \item \textbf{Proveravanje modela} \cite{model_checking} - osnovna ideja proveravanja modela je da se sistemski ispitaju sve moguće putanje u izvršavanju nekog sistema (softvera). Na ovaj način se ispituje da li sistem ispunjava neku invarijantu ili neko svojstvo koje treba da bude ispoljeno. Potrebno je precizno i formalno opisati model sistema, kao i svojstva koja se proveravaju kako bi bilo moguće primeniti proveravanje modela na odgovarajući način. Oslanja se na matematičku logiku, teoriju grafova i teoriju formalnih jezika.
     
-    \item \textbf{Simboličko izvršavanje} - tehnika u kojoj je ideja da promenljive u kodu mogu da budu konkretne (one kojima je poznata unapred vrednost) i simboličke (one kojima se vrednost dodeljuje na osnovu nekog izračunavanja, učitava se iz fajla, dobija kao rezultat nekog upita itd). Simboličko izvršavanje će detaljnije biti opisano u delu \ref{chp:simbolicko_izvrsavanje}.
+    \item \textbf{Simboličko izvršavanje} - tehnika apstrahovanja konkretnog izvršavanja programa korišćenjem simboličkih vrednosti. Simboličko izvršavanje će detaljno biti opisano u delu \ref{chp:simbolicko_izvrsavanje}.
     
 \end{description}
 
-U okviru rada je nadograđen alat KLEE za statičku verifikaciju softvera koji koristi upravo simboličko izvršavanje, koji je opisan u \ref{KLEE}. Alat je obogaćen novim algoritmom za pretragu stabla stanja koji je baziran na kombinaciji algoritama za pretragu grafova, pretrage grafa u širinu i pretrage grafa u dubinu. Predloženi algoritam je opisan u delu \ref{algoritam}. Rezultati poređenja rada algoritma sa radom algoritma koji su predložili autori samog alata pokazuju da se može dosta uštedeti na vremenu ovim pristupom, pri čemu se ne gubi mnogo u pokrivesnoti koda.
+U okviru rada, je nadograđen alat za statičku verifikaciju softvera KLEE \cite{klee}, koji koristi upravo simboličko izvršavanje. Ovaj alat je opisan u delu \ref{KLEE}. Alat je obogaćen novim algoritmom za pretragu stabla stanja koji je baziran na kombinaciji algoritama za pretragu grafova, pretrage grafa u širinu i pretrage grafa u dubinu. Predloženi algoritam, njegova implementacija i rezultati primene su 
+opisani u delu \ref{algoritam}. Rezultati poređenja rada algoritma sa radom algoritma koji su predložili autori samog alata pokazuju da se može dosta uštedeti na vremenu ovim pristupom, pri čemu se ne gubi mnogo u pokrivesnoti koda.
 
 % ------------------------------------------------------------------------------
 \chapter{Simboličko izvršavanje} \label{chp:simbolicko_izvrsavanje}
@@ -785,7 +786,6 @@ Eksperimantalnim putem je pokazano da su najbolji parametri za pokretanje algori
 % ------------------------------------------------------------------------------
 \chapter{Zaključak}
 % ------------------------------------------------------------------------------
-
 % ------------------------------------------------------------------------------
 % Literatura
 % ------------------------------------------------------------------------------
