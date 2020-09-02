@@ -170,19 +170,18 @@ opisani u delu \ref{algoritam}. Rezultati poređenja rada algoritma sa radom alg
 
 % ------------------------------------------------------------------------------
 \chapter{Simboličko izvršavanje} \label{chp:simbolicko_izvrsavanje}
-U okviru verifikacije softvera postoje dve velike oblasti, \textit{statička verifikacija softvera} i \textit{dinamička verifikacija softvera}. Statička verifikacija softvera se odnosi na tehnike verifikacije softvera kod kojih je moguće otkrivanje grešaka i rizičnog ponašanja napisanog programskog koda bez njegove prethodne kompilacije i pokretanja. Kod dinamičke verifikacije je nepohodno kompajlirati kod, pokrenuti ga, i tek je onda moguće otkriti greške i kritične delove. 
 
 \indent Simboličko izvršavanje je tehnika statičke verifikacije softvera, odnosno bavi se statičkom analizom koda. Jedna je od najkorišćenijih tehnika statičke verifikacije. Na primer, još od 2008. godine, nad većinom Majkrosoftovih (eng. \textit{Microsoft}) aplikacija se vrši verifikacija pomoću simboličkog izvršavanja, pre nego što aplikacije budu objavljene \cite{microsoft}. O efikasnosti ove tehnike govori činjenica da je 30\% grešaka u operativnom sistemu \textit{Windows 7} pronađeno baš na ovaj način, pri čemu su u pitanju greške koje nisu bile otkrivene korišćenjem drugih tehnika za statičku i dinamičku analizu softvera.
 
 \section{Principi simboličkog izvršavanja}
 
-Svaki program može biti izvršavan konkretno ili simbolički. Konkretno izvršavanje podrazumeva da su vrednosti svih promenljivih u kodu poznate i onda se prati kojim putem se prolazi izvršavanjem (zavisno od uslova grananja koji su ispunjeni). S druge strane, k\^od je moguće simbolički izvršavati čak i ako nisu poznate početne vrednosti za sve promenljive. Na primer, ukoliko u kodu postoji promenljiva $a$ tipa $int$ kojoj na početku nije poznata vrednost (vrednost joj se dodeljuje čitanjem sa standardnog ulaza ili na primer iz datoteke) ona se naziva simboličkom promenljivom. Ova promenljiva može da uzme bilo koju vrednost iz opsega vrednosti koje mogu biti čuvane u promenjivoj konkretnog tipa (u ovom slučaju je to celobrojni tip, odnosno $int$). U primeru \ref{lst:osnovni_primer}, promenljive $a$ i $b$ se nazivaju \textit{simboličke} i one mogu uzeti bilo koju vrednost iz opsega vrednosti koje mogu biti upisane u promenljivu tipa $int$.
+Svaki program može biti izvršavan konkretno ili simbolički. Konkretno izvršavanje podrazumeva da su vrednosti svih promenljivih u kodu poznate i onda se prati kojim putem se prolazi izvršavanjem (zavisno od uslova grananja koji su ispunjeni). S druge strane, k\^od je moguće simbolički izvršavati čak i ako nisu poznate početne vrednosti za sve promenljive. Na primer, ukoliko u kodu postoji promenljiva tipa $int$ kojoj na početku nije poznata vrednost (vrednost joj se dodeljuje čitanjem sa standardnog ulaza ili na primer iz datoteke) ona se naziva simboličkom promenljivom. Ova promenljiva može da uzme bilo koju vrednost iz opsega vrednosti koje mogu biti čuvane u promenjivoj konkretnog tipa (u ovom slučaju je to celobrojni tip, odnosno $int$). U primeru \ref{lst:osnovni_primer}, promenljive $a$ i $b$ se nazivaju \textit{simboličke} i one mogu uzeti bilo koju vrednost iz opsega vrednosti koje mogu biti upisane u promenljivu tipa $int$.
 
 \indent Osnovna ideja simboličkog izvršavnja je da se vrši simboličko, a ne konkretno izvršavanje. Za svaku od otkrivenih putanja tokom izvršavanja koda se čuvaju sledeći podaci: formula logike prvog reda koja predstavlja uslove koji su bili zadovoljeni u grananjima kroz koja se prošlo i koji su doveli do konkretne putanje i simbolički memorijski prostor u kome se čuvaju vrednosti simboličkih promenljivih. Grananja dovode do ažuriranja formule, dok dodeljivanje vrednosti simboličkim promenljivima dovodi do ažuriranja simboličkog memorijskog prostora. 
 
-\indent Nakon određivanja neke od putanja vrši se provera zadovoljivosti logičke formule koja odgovara putanji. Za ove potrebe se obično koristi SMT rešavač \cite{SMT}. Za svaku putanju kroz koju se može proći izvršavanjem postoji odgovarajuća logička formula koja predstavlja konjukciju uslova koji važe za promenljive na tom putu. Za svaku od tih formula SMT rešavač proverava da li je ona nezadovoljiva u nekoj valuaciji. Ukoliko postoji takva valuacija, to znači da je putanja kritična, odnosno da postoje vrednosti ulaznih promenljivih koje mogu dovesti do neke greške. Alat za simboličko izvršavanje onda može da pruži informaciju o tome koje vrednosti ulaznih podataka mogu dovesti do grešaka u kodu.
+\indent Nakon određivanja neke od putanja vrši se provera zadovoljivosti logičke formule koja odgovara putanji. Za ove potrebe se obično koristi SMT rešavač \cite{SMT}. Za svaku putanju kroz koju se može proći izvršavanjem postoji odgovarajuća logička formula koja predstavlja konjukciju uslova koji važe za promenljive na tom putu. Za svaku od tih formula se poziva SMT rešavač koji proverava da li postoji valuacija u kojoj je formula zadovoljiva. Pre nego što se formula pošalje SMT rešavaču, njoj se dodaje još i uslov greške. Nova formula nastaje tako što se pravi konjukcija stare formule i tog uslova. Uslov greške se uglavnom zadaje pomoću funkcije \textit{assert}. Ukoliko je novodobijena formula zadovoljiva u nekoj valuaciji, to znači da može doći do greške u programu, i alat za simboličko izvršavanje onda može da pruži informaciju o tome koje vrednosti ulaznih podataka mogu dovesti do nje.
 
-Kod simboličkog postoje \textit{stanja} koja nastaju simboličkim izvršavanjem programa. Sva stanja su oblika $(stmt, \sigma, \pi)$, gde važi sledeće:
+Kod simboličkog izvršavanja postoje \textit{stanja} koja nastaju simboličkim izvršavanjem programa. Sva stanja su oblika $(stmt, \sigma, \pi)$, gde važi sledeće:
 
 \begin{itemize}
     \item $stmt$ je naredba koja se izvršava u datom stanju, odnosno sledeća naredba na koju se naišlo u kodu.
@@ -191,7 +190,7 @@ Kod simboličkog postoje \textit{stanja} koja nastaju simboličkim izvršavanjem
     \item $\pi$ je formula logike prvog reda koja predstavlja skup uslova koji važe u trenutnom stanju. Ovi uslovi se nadograđuju prolaskom kroz različite naredbe grananja u kodu. Na početku, dok još ne postoji nijedno ograničenje koje treba da važi, odnosno dok se ne naiđe na neko grananje, važi $\pi = true$. 
 \end{itemize}
 
-Zavisno od naredbe $stmt$ alat za simboličko izvršavanje radi sledeće:
+Ukoliko k\^od koji se simbolički izvršava ne sadrži petlje, već samo uslovne skokove koji su predstavljeni naredbama grananja, zavisno od naredbe $stmt$ alat za simboličko izvršavanje radi sledeće:
 
 \begin{itemize}
     \item ako je u pitanju naredba dodele \texttt{x = p} simbolički memorijski prostor $\sigma$ se menja tako što se promenljivoj $x$ u tom prostoru dodeljuje vrednost $p_s$ gde $p_s$ predstavlja vrednost izraza sa desne strane operatora dodele. To može biti konkretna vrednost, ili vrednost nekog kompleksnijeg izraza koja se evaluira u konkretnom stanju zavisno od uslova koji važe. Dodelu označavamo sa $x \rightarrow p_s$.
@@ -201,21 +200,25 @@ Zavisno od naredbe $stmt$ alat za simboličko izvršavanje radi sledeće:
 
 \section{Izazovi simboličkog izvršavanja}
 
-Ideja simboličkog izvršavanja je da se detaljnom analizom svih putanja kroz koje se može proći u kodu pronađu ulazne vrednosti koje bi mogle dovesti do grešaka. Teorijski gledano ovo je odličan koncept koji garantuje \textit{saglasnost} (eng. \textit{soundness}) i \textit{kompletnost}. Saglasnost garantuje da neće biti lažno pozitivnih rezlutata. Lažno pozitivni rezultati predstavljaju pojavu gde se neki ulazni podaci prograšavaju kritičnim tj. kaže se da mogu dovesti do greške, a to nije tačno, odnosno sa tim ulaznim podacima ne može doći do prijavljene greške. Kompletnost garantuje da neće biti lažno negativnih rezultata. To znači da se neće desiti da za neke ulazne podatke koji mogu dovesti do greške alat kaže da su validni. U praksi, vrlo često ovo nije moguće postići jer se obično radi sa kompleksnim softverom, tako da se obično zarad performansi žrtvuje saglasnost. Glavni problem predstavljaju petlje i rekurzija. Ukoliko broj iteracija petlje zavisi od neke simboličke promenljive ili nekog spoljnog faktora nije moguće unapred znati koliko puta će se petlja izvršavati. Zbog ovoga se gubi na preciznosti. Neki od glavnih izazova sa kojima se suočava simboličko izvršavanje su: 
+Ideja simboličkog izvršavanja je da se detaljnom analizom svih putanja kroz koje se može proći u kodu pronađu ulazne vrednosti koje bi mogle dovesti do grešaka. Teorijski gledano ovo je odličan koncept koji za konačan broj mogućih stanja garantuje \textit{saglasnost} (eng. \textit{soundness}) i \textit{kompletnost}. Saglasnost garantuje da neće biti lažno pozitivnih rezlutata. Lažno pozitivni rezultati predstavljaju pojavu gde se neki ulazni podaci prograšavaju kritičnim tj. kaže se da mogu dovesti do greške, a to nije tačno, odnosno sa tim ulaznim podacima ne može doći do prijavljene greške. Kompletnost garantuje da neće biti lažno negativnih rezultata. To znači da se neće desiti da za neke ulazne podatke koji mogu dovesti do greške alat kaže da su validni. 
+
+U praksi, vrlo često ovo nije moguće postići jer se obično radi sa kompleksnim softverom, tako da se zarad performansi žrtvuju ili saglasnost ili kompletnost, zavisno od tehnike statičke analize softvera koja se primenjuje. Konkretno, simboličko izvršavanje žrtvuje kompletnost. Glavni problem predstavljaju petlje i rekurzija. Ukoliko broj iteracija petlje zavisi od neke simboličke promenljive ili nekog spoljnog faktora nije moguće unapred znati koliko puta će se petlja izvršavati. Zbog ovoga se gubi na preciznosti. 
+
+Neki od glavnih izazova sa kojima se suočava simboličko izvršavanje su: 
 
 \begin{description}
-    \item \textbf{Eksplozija stanja}: na koji način se rešava problem eksplozije stanja? Petlje, rekurzija ili ugnježdene naredbe grananja unutar petlji dovode do ogromnog broja stanja. Nije realno očekivati da alat za simboličko izvršavanje može sve ove putanje da istraži u razumnom vremenu.
+    \item \textbf{Eksplozija stanja}: za svaku narednu grananja koja se javlja u kodu postoje dve različite putanje kojima izvršavanje može da ide. Takođe, za petlje čiji broj iteracija zavisi od simboličke promenljive može da postoji ogroman broj potencijalnih putanja. Broj putanja koje mogu da postoje u programu je često jako veliki, i sa povećanjem veličine softvera eksponencijalno raste. Ova pojava se naziva eksplozija stanja. Nije realno očekivati da alat za simboličko izvršavanje može sve ove putanje da istraži u razumnom vremenu. Zbog toga se postavlja pitanje na koji način se rešava problem eksplozije stanja u okviru simboličkog izvršavanja?
     
     \item \textbf{Memorija}: na koji način alati za simboličko izvršavanje rade sa pokazivačima, nizovima, višedimenzionim nizovima, strukturama, klasama i drugim kompleksnim objektima.
 
-    \item \textbf{Rešavanje ograničenja}: SMT rešavaču može biti potrebno mnogo vremena da reši neka kompleksna ograničenja (formule logike prvog reda). Pitanje je na koji način smanjiti broj poziva rešavaču kako bi i samo izvršavanje bilo što je moguće efikasnije.
+    \item \textbf{Rešavanje ograničenja}: SMT rešavaču može biti potrebno mnogo vremena da reši neka kompleksna ograničenja (formule logike prvog reda). Pitanje je na koji način smanjiti broj poziva rešavaču kako bi i samo simboličko izvršavanje bilo što je moguće efikasnije.
     
 \end{description}
 
-\noindent Način rešavanja navedenih problema u alatu KLEE će biti razmotren u poglavlju \ref{KLEE}.
+\noindent Način rešavanja navedenih problema u alatu KLEE će biti razmotren u delu \ref{KLEE}.
 
 \section{Primer simboličkog izvršavanja}
-Na primeru jedne jednostavne funkcije bice objasnjeno na koji način simboličko izvršavanje funkcioniše.
+Na primeru jedne jednostavne funkcije biće objašnjeno na koji način simboličko izvršavanje funkcioniše.
 
     \begin{lstlisting}[caption={Osnovni primer simboličkog izvršavanja},captionpos=b,label={lst:osnovni_primer}]
         1. void foo(int a, int b) {
@@ -376,7 +379,7 @@ Ova tehnika uglavnom predstavlja kombinaciju pretrage u dubinu i pretrage vođen
 \subsection{Hibridne strategije} 
 Hibridne strategije se svode na kombinaciju većeg broja algoritama koji se na određene načine smenjuju prilikom pretrage. Zavisno od specifičnih potreba (otkrivanje putanje do određene naredbe, otkrivanje što većeg broja putanja, pokrivenost koda itd.) koriste se kombinacije različitih algoritama koji se pri izvršavanju smenjuju i kombinuju na različite načine.
 
-\section{Pregled alata za simboličko izvršavanje} \label{alati_za_simbolicko}
+\section{Karakterisitike alata za simboličko izvršavanje} \label{osobine_alata}
 
 Postoji veliki broj različitih alata za simboličko izvršavanje. Većina ovih alata počiva na istim principima:
 
@@ -395,7 +398,9 @@ Na osnovu toga da li pokušavaju da obrade veći broj putanja odjednom ili jednu
     
     \item \textbf{\textit{hibridni} alati} - hibridni alati kao što je Mayhem \cite{mayhem} pokušavaju da pronađu balans između prevelikog utroška memorije i vremena koje je potrebno za izvršavanje. Na početku počinju kao \textit{online} rešavači, a kada se memorija popuni do određene količine prelaze u \textit{offline} izvršavanje.
 \end{description}
-\bigskip
+
+\section{Pregled najpoznatijih alata za simboličko izvršavanje} \label{alati_za_simbolicko}
+
 U daljem tekstu će biti ukratko opisani alati koji simboličkim izvršavanjem vrše verifikaciju softvera.
 
 \paragraph{DART} \cite{dart} - (eng. \textit{Directed Automated Random Testing}) je alat koji vrši dinamičko konkoličko simboličko izvršavanje. Za odabir uslova grananja koji će biti negiran kako bi se otkrila nova putanja se koristi algoritam pretrage u dubinu (DFS). DART je alat koji počiva na tri osnovna principa:
@@ -424,7 +429,7 @@ Pored koncepta hibridnog alata, Mayhem još uvodi i memoriju zasnovanu na indeks
 
 \paragraph{AEG} \cite{aeg} - \textbf{Automatic Exploit Generation} je alat koji je napravljen kao nadgradnja drugog alata za simboličko izvršavanje, \textit{KLEE-a}\cite{klee}. Osnovna ideja ovog alata je da se ne istražuju sve moguće putanje u programu, već da fokus bude na onim putanjama za koje se veruje da imaju veću verovatnoću izvršavanja zavisno od vrednosti ulaznih podataka. Osnovna tehnika kojom se služi ovaj alat je preduslovno simboličko izvršavanje (eng. \textit{preconditioned symbolic execution}). Jedan zasad poznati problem ovog alata je skalabilnost na velikim programima, ali se na tome aktivno radi.
 
-\paragraph{KLEE} \cite{klee} - jedan od najkorišćenijih alata za simboličko izvršavanje. Kako je ovaj rad zasnovan upravo na alatu KLEE, on će biti detaljnije opisan u poglavlju \ref{KLEE}.
+\paragraph{KLEE} \cite{klee} - jedan od najkorišćenijih alata za simboličko izvršavanje. Kako je ovaj rad zasnovan upravo na alatu KLEE, on će biti detaljnije opisan u delu \ref{KLEE}.
 
 \chapter{Alat za simboličko izvršavanje KLEE} \label{KLEE}
 \paragraph{KLEE}\cite{klee} je alat otvorenog koda koji je nastao na Univerzitetu Ilinois. U pitanju je potpuno simbolički alat što znači da su sve promenljive simboličke i nema konkoličkog simboličkog izvršavanja. Ideja alata je da pokuša kompletne programe da izvršava simbolički uz dodatak konkretnih vrednosti koje se u kodu javljaju kao konstante. Dakle, KLEE ne generiše slučajan ulaz i na taj način prati kojim se putem prolazi zavisno od vrednosti, već pokušava da ide različitim putevima odjednom menjajući uslove koji važe. Na primer ako imamo uslov grananja $x > 3$ onda KLEE putanju deli na dve disjunktne putanje. U jednoj će važiti $\pi \land x > 3$ a u drugoj negacija tog uslova, odnosno $\pi \land x \leq 3$. Na ovaj način KLEE prolazi kroz obe putanje. Odlika ovog alata je i ta da sve putanje obilazi paralelno, tj. ne izučava jednu putanju do kraja. Stanja koja su vezana za svaku od aktivnih putanja se čuvaju sve vreme bez obzira na algoritam koji se koristi. Ovo je očekivano ponašanje zato što je KLEE jedan od \textit{online} alata za simboličko izvršavanje.
