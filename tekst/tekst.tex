@@ -96,8 +96,12 @@
 % Datum odbrane (obrisati ili iskomentarisati narednu liniju ako datum odbrane nije poznat)
 \datumodbrane{15. januar 2016.}
 
+% Apstrakt na srpskom jeziku (u odabranom pismu)
+\apstr{
+Statička verifikacija softvera je podoblast verifikacije softvera koja vrši statičku analizu napisanog koda. Ideja je da bez pokretanja samog koda bude moguće ustanoviti da li neke i koje ulazne vrednosti podataka mogu dovesti do grešaka u izvršavanju. Pored drugih tehnika statičke analize postoji i simboličko izvršavanje. Ideja je razlikovati promenljive koje imaju dodeljenu vrednost kroz k\^od, i one koje zavise od nekih spoljnih faktora (pozivi bazi, standardni ulaz, datoteke itd). Simboličko izvršavanje pokušava da analizira putanje kroz koje se može proći izvršavanjem programa, kreirajući stablo stanja koja se formiraju prolaskom kroz putanje. Za svaku putanju se proverava da li u njoj može doći do greške, i ako je to moguće ona se označava kao kritična. Moguće je odrediti i vrednosti ulaznih podataka koje mogu dovesti do greške. U ovom radu je nadograđen jedan od alata za simboličko izvršavanje, KLEE, koji je implementiram u programskom jeziku C++. Ovaj alat se koristi za statičku analizu kodova koji su napisani u programskim jezicima C i C++. Alat je obogaćen novim algoritmom pretrage stabla stanja koja mogu nastati izvršavanjem programa. Poređenje predloženog algoritma sa algoritmima predloženim od strane autora alata je vršeno na nekim kodovima koji su napisani u okviru GNU Coreutils-a.
+}
 % Ključne reči na srpskom jeziku (u odabranom pismu)
-\kljucnereci{}
+\kljucnereci{Verifikacija softvera, simboličko izvršavanje, KLEE, pretraga stabla izvršavanja programa}
 
 \begin{document}
 % ==============================================================================
@@ -111,7 +115,7 @@
 % Strana sa posvetom (u odabranom pismu)
 %\posveta{Мами, тати и деди}
 % Strana sa podacima o disertaciji na srpskom jeziku
-% \apstrakt
+\apstrakt
 % Sadržaj teze
 \tableofcontents*
 
@@ -801,7 +805,7 @@ U ovom radu su opisani opšte tehnike i načini verifikacije softvera sa posebni
 
 Kao glavni doprinos rada, implementiran je novi algoritam kojim je alat KLEE obogaćen. Osnovna ideja je bila iskombinovati dva osnovna algoritma pretrage grafova kako bi se u kontekstu simboličkog izvršavanja iskoristile njihove dobre strane. Sve mane koje algoritmi zasebno imaju nisu u potpunosti ispravljene (to se pre svega odnosi na pretragu grafa u dubinu), ali su unapređene. Predloženi algoritam je na kodovima koji su napisani u okviru GNU Coreutils-a poređen sa algoritmom koji su autori rada predložili kao najbolji u smislu pokrivenosti koda i sveukupnih performansi. Rezultati su pokazali da se ovim pristupom može značajno uštedeti na vremenu, pri čemu je pokrivenost koda nešto manja.
 
-Dalja unapređenja bi podrazumevala nešto drugačiji pristup i modifikaciju algoritma. Kombinacija BFS i DFS algoritma bi mogla da se izmeni tako što se nakon nekog vremena, tj. ponovnog pražnjenja memorije ponovo prelazi na pretragu u širinu. Na ovaj način bi se stablo izvršavanja dodatno razgranalo na nekom nivou čime bi potencijalno nastale neke nove zanimljive putanje.
+Dalja unapređenja bi podrazumevala nešto drugačiji pristup i modifikaciju algoritma. Kombinacija BFS i DFS algoritma bi mogla da se izmeni tako što se nakon nekog vremena, tj. ponovnog pražnjenja memorije završavanjem putanja pretragom u dubinu, ponovo prelazi na pretragu u širinu. Na ovaj način bi se stablo izvršavanja dodatno razgranalo na nekom nivou čime bi potencijalno nastale neke nove zanimljive putanje.
 % ------------------------------------------------------------------------------
 % Literatura
 % ------------------------------------------------------------------------------
