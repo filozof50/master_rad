@@ -788,9 +788,20 @@ Na osnovu predloga autora \cite{klee}, alatu je dato 1000 megabajta memorije za 
 
 Eksperimantalnim putem je pokazano da su najbolji parametri za pokretanje algoritma BFS-DFS 40\% za memoriju nakon čije popunjenosti se prelazi na pretragu u dubinu i 10000 za broj instrukcija nakon kojih se vrši izbacivanje DFS stanja ukoliko nije bilo otkrivanja nove instrukcije. Povećanjem procenta memorije je pokrivenost koda bila manje, dok se povećanjem broja instrukcija pokrivenost koda neznatno popravila, međutim vreme izvršavanja je bilo daleko duže.
 
+Eksperimentalno je pokazano da uz ovakav izbor parametara na odabranom korpusu kodova nikada ne dolazi do popunjavanja memorije u potpunosti, odnosno da se stanja izbacuju iz skupa aktivnih samo DFS algoritmom na opisani način.
+
+\subsection{Izmene algoritma}
+
+Pored opisanog pristupa, bilo je pokušaja neznatne modifikacije algoritma. Pokušaj je bio da se stanja ne izbacuju nakon određenog broja izvršenih instrukcija pri čemu nije bilo otkrivanja nove, već da se izbacivanje vrši nakon određenog vremena, ukoliko nije bila otkrivena nova instrukcija. Još jedna ideja je bila da se nakon određene dubine u putanji ukoliko nije bilo otkrivanja nove instrukcije vrši izbacivanje stanja. Nijedan od ova dva pristupa nije doneo unapređenja algoritmu.
+
 % ------------------------------------------------------------------------------
 \chapter{Zaključak}
 % ------------------------------------------------------------------------------
+U ovom radu su opisani opšte tehnike i načini verifikacije softvera sa posebnim osvrtom na statičku verifikaciju softvera. Tehnika statičke verifikacije koja je opisana je simboličko izvršavanje. Simboličko izvršavanje je jedna od danas često korišćenih tehnika statičke verifikacije softevra i u najvećim softverskim kompanijama. Odabrani alat koji je obogaćen novim algoritmom pretrage stabla stanja koristi upravo simboličko izvršavanje za statičku analizu koda. 
+
+Kao glavni doprinos rada, implementiran je novi algoritam kojim je alat KLEE obogaćen. Osnovna ideja je bila iskombinovati dva osnovna algoritma pretrage grafova kako bi se u kontekstu simboličkog izvršavanja iskoristile njihove dobre strane. Sve mane koje algoritmi zasebno imaju nisu u potpunosti ispravljene (to se pre svega odnosi na pretragu grafa u dubinu), ali su unapređene. Predloženi algoritam je na kodovima koji su napisani u okviru GNU Coreutils-a poređen sa algoritmom koji su autori rada predložili kao najbolji u smislu pokrivenosti koda i sveukupnih performansi. Rezultati su pokazali da se ovim pristupom može značajno uštedeti na vremenu, pri čemu je pokrivenost koda nešto manja.
+
+Dalja unapređenja bi podrazumevala nešto drugačiji pristup i modifikaciju algoritma. Kombinacija BFS i DFS algoritma bi mogla da se izmeni tako što se nakon nekog vremena, tj. ponovnog pražnjenja memorije ponovo prelazi na pretragu u širinu. Na ovaj način bi se stablo izvršavanja dodatno razgranalo na nekom nivou čime bi potencijalno nastale neke nove zanimljive putanje.
 % ------------------------------------------------------------------------------
 % Literatura
 % ------------------------------------------------------------------------------
@@ -804,6 +815,13 @@ Eksperimantalnim putem je pokazano da su najbolji parametri za pokretanje algori
 % ------------------------------------------------------------------------------
 % Biografija kandidata
 \begin{biografija}
+\textbf{Strahinja S. Stanojević} rođen je 16.05.1995. godine u Kosovskoj Mitrovici. Osnovnu školu, kao i prirodno-matematički smer gimnazije u Grockoj, završio je kao nosilac Vukove diplome. 
+
+Smer Informatika na Matematičkom fakultetu Univerziteta u Beogradu upisuje 2014. godine. Na navedenom smeru je diplomirao 2017. godine, posle tri godine studija sa prosečnom ocenom 9,34. Master studije upisuje na istom fakultetu odmah nakon diplomiranja. 
+
+U oktobru 2018. biva izabran u zvanje „Saradnik u nastavi“ na Matematičkom fakultetu paralelno sa master studijama. Drži vežbe iz kurseva „Konstrukcija i analiza algoritama” na smerovima ,,Računarstvo i informatika'' i ,,Informatika'', kao i ,,Programiranje 1'' na prvoj godini osnovnih studija smera ,,Informatika''. 
+
+Oblasti interesovanja uključuju pre svega razvoj i verifikaciju softvera i algoritme.
 \end{biografija}
 % ------------------------------------------------------------------------------
 
