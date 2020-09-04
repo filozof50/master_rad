@@ -51,7 +51,8 @@
     filecolor=magenta,      
     urlcolor=cyan,
 }
-\usepackage{listings} % listing programskog koda
+\usepackage{listings, multicol} % listing programskog koda
+
 \newtoggle{InString}{}% Keep track of if we are within a string
 \togglefalse{InString}% Assume not initally in string
 \newcommand*{\ColorIfNotInString}[1]{\iftoggle{InString}{#1}{\color{red}#1}}%
@@ -183,8 +184,9 @@ Konkretno izvršavanje podrazumeva da su vrednosti svih promenljivih u kodu pozn
 
 \indent Osnovna ideja simboličkog izvršavnja je da se vrši simboličko, a ne konkretno izvršavanje. Za svaku od putanja tokom simboličkog izvršavanja koda se čuvaju sledeći podaci: formula logike prvog reda koja predstavlja uslove koji su bili zadovoljeni u grananjima kroz koja se prošlo i koji su doveli do konkretne putanje i simbolički memorijski prostor u kome se čuvaju vrednosti simboličkih promenljivih. Grananja dovode do ažuriranja formule, dok dodeljivanje vrednosti simboličkim promenljivima dovodi do ažuriranja simboličkog memorijskog prostora. 
 
-\indent Neki alati nakon određivanja neke od putanja vrše proveru zadovoljivosti logičke formule koja odgovara putanji. Za ove potrebe se obično koristi SMT rešavač \cite{SMT}. Za svaku putanju kroz koju se može proći izvršavanjem postoji odgovarajuća logička formula koja predstavlja konjukciju uslova koji važe za promenljive na tom putu. Za svaku od tih formula se poziva SMT rešavač koji proverava da li postoji valuacija u kojoj je formula zadovoljiva. Na ovaj način se utvrđuje da li je ta putanja uopšte dostižna.
-Nakon što se ustanovi da je putanja dostižna, formuli koja joj odgovara se dodaje i uslov greške. Uslov greške u programu može da bude zadat pomoću funkcije \textit{assert}. Ukoliko je novodobijena formula zadovoljiva u nekoj valuaciji, to znači da može doći do greške u programu, i alat za simboličko izvršavanje onda može da pruži informaciju o tome koje vrednosti ulaznih podataka mogu dovesti do nje.
+\indent Za svaku putanju koja nastaje simboličkim izvršavanjem se kreira logička formula logike prvog reda koja predstavlja konjukciju ograničenja koja važe za promenljive na tom putu. Neki alati proveravaju da li je putanja uopšte dostižna proverom zadovoljivosti logičke formule. Ukoliko je formula nezadovoljiva, onda je putanja nedostižna u kodu. S druge strane, postoje alati koji ne proveravaju dostižnost putanje, već samo vrše proveru da li može doći do greške kada se naiđe na odgovarajuću naredbu. Provera zadovoljivosti formule se vrši pomoću SMT rešavača \cite{SMT}. 
+
+Ukoliko se simboličkim izvršavanjem dođe do neke naredbe koja može da izazove grešku, logičkoj formuli putanje se dodaje i uslov greške, koji može da bude zadat pomoću funkcije \textit{assert}. Ukoliko je novodobijena formula zadovoljiva u nekoj valuaciji, to znači da može doći do greške u programu, i alat za simboličko izvršavanje onda može da pruži informaciju o tome koje vrednosti ulaznih podataka mogu dovesti do nje.
 
 S druge strane, postoje alati koji ne proveravaju da li je putanja dostižna, već kada se dođe do naredbe koja može da izazove grešku, uslov greške dodaju formuli koja odgovara putanji i kao t
 
@@ -207,7 +209,7 @@ Ukoliko k\^od koji se simbolički izvršava ne sadrži petlje, već samo uslovne
 
 \section{Izazovi simboličkog izvršavanja}
 
-Ideja simboličkog izvršavanja je da se detaljnom analizom svih putanja kroz koje se može proći u kodu pronađu ulazne vrednosti koje bi mogle dovesti do grešaka. Teorijski gledano ovo je odličan koncept koji za konačan broj mogućih stanja garantuje \textit{saglasnost} (eng. \textit{soundness}) i \textit{kompletnost}. Saglasnost garantuje da neće biti lažno pozitivnih rezlutata. Lažno pozitivni rezultati predstavljaju pojavu gde se neki ulazni podaci proglašavaju kritičnim tj. kaže se da mogu dovesti do greške, a to nije tačno, odnosno sa tim ulaznim podacima ne može doći do prijavljene greške. Kompletnost garantuje da neće biti lažno negativnih rezultata. To znači da se neće desiti da za neke ulazne podatke koji mogu dovesti do greške alat kaže da su validni. 
+Ideja simboličkog izvršavanja je da se detaljnom analizom svih putanja kroz koje se može proći u kodu pronađu ulazne vrednosti koje bi mogle dovesti do grešaka. Teorijski gledano ovo je odličan koncept koji za konačan broj mogućih stanja garantuje \textit{saglasnost} (eng. \textit{soundness}) i \textit{kompletnost}. Saglasnost garantuje da neće biti lažno pozitivnih rezlutata. Lažno pozitivni rezultati predstavljaju pojavu gde se neki ulazni podaci proglašavaju kritičnim tj. kaže se da mogu dovesti do greške, a to nije tačno, odnosno sa tim ulaznim podacima ne može doći do prijavljene greške. Kompletnost garantuje da neće biti lažno pozitivnih rezultata. To znači da se neće desiti da za neke ulazne podatke koji mogu dovesti do greške alat kaže da su validni. 
 
 U praksi, vrlo često ovo nije moguće postići jer se obično radi sa kompleksnim softverom, tako da se zarad performansi žrtvuju ili saglasnost ili kompletnost, zavisno od tehnike statičke analize softvera koja se primenjuje. Konkretno, simboličko izvršavanje žrtvuje kompletnost. Glavni problem predstavljaju petlje i rekurzija. Ukoliko broj iteracija petlje zavisi od neke simboličke promenljive ili nekog spoljnog faktora nije moguće unapred znati koliko puta će se petlja izvršavati. Zbog ovoga se gubi na preciznosti. 
 
@@ -550,7 +552,60 @@ U ovom delu će biti prikazan rad algoritama DFS i BFS na primeru koji je dat u 
     \label{fig:moj_primer}
 \end{figure}
 
-\begin{minipage}{\linewidth}
+% original verzija
+% \begin{minipage}{\linewidth}
+% \begin{lstlisting}[caption={Primer simboličkog izvršavanja u alatu KLEE},captionpos=b,label={lst:primer_KLEE}]
+%   void foo(int a) {
+%     if (a > 1000) {
+%       a /= 2;
+%       if (a > 700) {
+%         a /= 2;
+%         if (a > 400) {
+%           a /= 2;
+%         }
+%         else {
+%           return ;
+%         }
+%       }
+%       else {
+%         a *= 2;
+%         if (a < 1100) {
+%           return ;
+%         }
+%         else {
+%           a *= 2;
+%         }
+%       }
+%     }
+%     else {
+%       a *= 2;
+%       if (a > 1200) {
+%         a /= 2;
+
+%         if (a > 700) {
+%           a /= 2;
+%         }
+%         else {
+%           return ;
+%         }
+%       }
+%       else {
+%         a *= 2;
+
+%         if (a > 1000) {
+%           a *= 2;
+%         }
+%         else {
+%           a *= 2;
+%         }
+%       }
+%     }
+%   }
+% \end{lstlisting}
+% \end{minipage}
+
+% ovo [t] je da budu oba listinga uz vrh strane poravnana ako nisu iste dužine
+\noindent\begin{minipage}[t]{.45\textwidth}
 \begin{lstlisting}[caption={Primer simboličkog izvršavanja u alatu KLEE},captionpos=b,label={lst:primer_KLEE}]
   void foo(int a) {
     if (a > 1000) {
@@ -574,6 +629,10 @@ U ovom delu će biti prikazan rad algoritama DFS i BFS na primeru koji je dat u 
         }
       }
     }
+\end{lstlisting}
+\end{minipage}\hfill
+\begin{minipage}[t]{.45\textwidth}
+\begin{lstlisting}
     else {
       a *= 2;
       if (a > 1200) {
