@@ -184,22 +184,21 @@ Konkretno izvršavanje podrazumeva da su vrednosti svih promenljivih u kodu pozn
 
 \indent Osnovna ideja simboličkog izvršavnja je da se vrši simboličko, a ne konkretno izvršavanje. Za svaku od putanja tokom simboličkog izvršavanja koda se čuvaju sledeći podaci: formula logike prvog reda koja predstavlja uslove koji su bili zadovoljeni u grananjima kroz koja se prošlo i koji su doveli do konkretne putanje i simbolički memorijski prostor u kome se čuvaju vrednosti simboličkih promenljivih. Grananja dovode do ažuriranja formule, dok dodeljivanje vrednosti simboličkim promenljivima dovodi do ažuriranja simboličkog memorijskog prostora. 
 
-\indent Za svaku putanju koja nastaje simboličkim izvršavanjem se kreira logička formula logike prvog reda koja predstavlja konjukciju ograničenja koja važe za promenljive na tom putu. Neki alati proveravaju da li je putanja uopšte dostižna proverom zadovoljivosti logičke formule. Ukoliko je formula nezadovoljiva, onda je putanja nedostižna u kodu. S druge strane, postoje alati koji ne proveravaju dostižnost putanje, već samo vrše proveru da li može doći do greške kada se naiđe na odgovarajuću naredbu. Provera zadovoljivosti formule se vrši pomoću SMT rešavača \cite{SMT}. 
+\indent Za svaku putanju koja nastaje simboličkim izvršavanjem se kreira formula logike prvog reda koja predstavlja konjukciju ograničenja koja važe za promenljive na tom putu. Neki alati proveravaju da li je putanja uopšte dostižna proverom zadovoljivosti logičke formule. Ukoliko je formula nezadovoljiva, onda je putanja nedostižna u kodu. S druge strane, postoje alati koji ne proveravaju dostižnost putanje, već samo vrše proveru da li može doći do greške kada se naiđe na odgovarajuću naredbu. Provera zadovoljivosti formule se vrši pomoću SMT rešavača \cite{SMT}. 
 
 Ukoliko se simboličkim izvršavanjem dođe do neke naredbe koja može da izazove grešku, logičkoj formuli putanje se dodaje i uslov greške, koji može da bude zadat pomoću funkcije \textit{assert}. Ukoliko je novodobijena formula zadovoljiva u nekoj valuaciji, to znači da može doći do greške u programu, i alat za simboličko izvršavanje onda može da pruži informaciju o tome koje vrednosti ulaznih podataka mogu dovesti do nje.
-
-S druge strane, postoje alati koji ne proveravaju da li je putanja dostižna, već kada se dođe do naredbe koja može da izazove grešku, uslov greške dodaju formuli koja odgovara putanji i kao t
 
 Kod simboličkog izvršavanja postoje \textit{stanja} koja nastaju simboličkim izvršavanjem programa. Sva stanja su oblika $(stmt, \sigma, \pi)$, gde važi sledeće:
 
 \begin{itemize}
-    \item $stmt$ je naredba koja se izvršava u datom stanju, odnosno sledeća naredba na koju se naišlo u kodu.
+    \item $stmt$ je naredba koja se trenutno izvršava.
+    
     \item $\sigma$ predstavlja simbolički memorijski prostor u koji se smeštaju vrednosti koje su dodeljene simboličkim promenljivima. Ove vrednosti će u narednim primerima biti označavane sa $\alpha_i$. Iste oznake se koriste i za druge podatke koji nisu unapred poznati (nije ih moguće odrediti statičkom analizom koda) kao što su rezultati izvršavanja sistemskih poziva, čitanje iz tokova (eng. \textit{streams}) i slično.
     
     \item $\pi$ je formula logike prvog reda koja predstavlja skup uslova koji važe u trenutnom stanju. Ovi uslovi se nadograđuju prolaskom kroz različite naredbe grananja u kodu. Na početku, dok još ne postoji nijedno ograničenje koje treba da važi, odnosno dok se ne naiđe na neko grananje, važi $\pi = true$. 
 \end{itemize}
 
-Ukoliko k\^od koji se simbolički izvršava ne sadrži petlje, već samo uslovne skokove koji su predstavljeni naredbama grananja, zavisno od naredbe $stmt$ alat za simboličko izvršavanje radi sledeće:
+Ukoliko k\^od koji se simbolički izvršava ne sadrži petlje \footnote[1]{Kada se u kodu naidje na petlju, ona se razmotava tako da se uslov petlje pretvara u grananje a kod petlje se duplira.}, već samo uslovne skokove koji su predstavljeni naredbama grananja, zavisno od naredbe $stmt$ alat za simboličko izvršavanje radi sledeće:
 
 \begin{itemize}
     \item ako je u pitanju naredba dodele \texttt{x = p} simbolički memorijski prostor $\sigma$ se menja tako što se promenljivoj $x$ u tom prostoru dodeljuje vrednost $p_s$ gde $p_s$ predstavlja vrednost izraza sa desne strane operatora dodele. To može biti konkretna vrednost, ili vrednost nekog kompleksnijeg izraza koja se evaluira u konkretnom stanju zavisno od uslova koji važe. Dodelu označavamo sa $x \rightarrow p_s$.
@@ -209,16 +208,16 @@ Ukoliko k\^od koji se simbolički izvršava ne sadrži petlje, već samo uslovne
 
 \section{Izazovi simboličkog izvršavanja}
 
-Ideja simboličkog izvršavanja je da se detaljnom analizom svih putanja kroz koje se može proći u kodu pronađu ulazne vrednosti koje bi mogle dovesti do grešaka. Teorijski gledano ovo je odličan koncept koji za konačan broj mogućih stanja garantuje \textit{saglasnost} (eng. \textit{soundness}) i \textit{kompletnost}. Saglasnost garantuje da neće biti lažno pozitivnih rezlutata. Lažno pozitivni rezultati predstavljaju pojavu gde se neki ulazni podaci proglašavaju kritičnim tj. kaže se da mogu dovesti do greške, a to nije tačno, odnosno sa tim ulaznim podacima ne može doći do prijavljene greške. Kompletnost garantuje da neće biti lažno pozitivnih rezultata. To znači da se neće desiti da za neke ulazne podatke koji mogu dovesti do greške alat kaže da su validni. 
+Ideja simboličkog izvršavanja je da se detaljnom analizom svih putanja kroz koje se može proći u kodu pronađu ulazne vrednosti koje bi mogle dovesti do grešaka. Teorijski gledano ovo je odličan koncept koji za konačan broj mogućih stanja garantuje \textit{saglasnost} (eng. \textit{soundness}) i \textit{kompletnost}. Saglasnost garantuje da neće biti lažno pozitivnih rezlutata. Lažno pozitivni rezultati predstavljaju pojavu gde se neki ulazni podaci proglašavaju kritičnim tj. kaže se da mogu dovesti do greške, a to nije tačno, odnosno sa tim ulaznim podacima ne može doći do prijavljene greške. Kompletnost garantuje da neće biti lažno pozitivnih rezultata. To znači da postoje ulazni podaci koji mogu dovesti do greške, ali da ih alat ne pronađe. 
 
-U praksi, vrlo često ovo nije moguće postići jer se obično radi sa kompleksnim softverom, tako da se zarad performansi žrtvuju ili saglasnost ili kompletnost, zavisno od tehnike statičke analize softvera koja se primenjuje. Konkretno, simboličko izvršavanje žrtvuje kompletnost. Glavni problem predstavljaju petlje i rekurzija. Ukoliko broj iteracija petlje zavisi od neke simboličke promenljive ili nekog spoljnog faktora nije moguće unapred znati koliko puta će se petlja izvršavati. Zbog ovoga se gubi na preciznosti. 
+U praksi, vrlo često ovo nije moguće postići jer se obično radi sa kompleksnim softverom i broj putanja i mogućih stanja može da bude i beskonačan, pa ih zato nije ni moguće sve obići. Zbog toga je potrebno ili apstrahovati analizu ili svesno preskočiti neke putanje i stanja. To vodi do žrtvovanja saglasnostili ili kompletnosti, zavisno od tehnike statičke analize softvera koja se primenjuje. Konkretno, simboličko izvršavanje žrtvuje kompletnost. Glavni problem predstavljaju petlje i rekurzija. Ukoliko broj iteracija petlje zavisi od neke simboličke promenljive ili nekog spoljnog faktora nije moguće unapred znati koliko puta će se petlja izvršavati. Zbog ovoga se gubi na preciznosti. 
 
 Neki od glavnih izazova sa kojima se suočava simboličko izvršavanje su: 
 
 \begin{description}
     \item \textbf{Eksplozija stanja}: za svaku naredbu grananja koja se javlja u kodu postoje dve različite putanje kojima izvršavanje može da ide. Takođe, za petlje čiji broj iteracija zavisi od simboličke promenljive može da postoji ogroman broj potencijalnih putanja. Broj putanja koje mogu da postoje u programu je često jako veliki, i sa povećanjem veličine softvera eksponencijalno raste. Ova pojava se naziva eksplozija stanja. Nije realno očekivati da alat za simboličko izvršavanje može sve ove putanje da istraži u razumnom vremenu. Zbog toga se postavlja pitanje na koji način se rešava problem eksplozije stanja u okviru simboličkog izvršavanja?
     
-    \item \textbf{Memorija}: na koji način alati za simboličko izvršavanje rade sa pokazivačima, nizovima, višedimenzionim nizovima, strukturama, klasama i drugim kompleksnim objektima.
+    \item \textbf{Memorija}: na koji način alati za simboličko izvršavanje rade sa pokazivačima, nizovima, višedimenzionim nizovima, strukturama, klasama i drugim kompleksnim objektima. Ukoliko u kodu postoje simboličke promenljive koje predstavljaju pokazivače ili neke složene strukture podataka, one takođe utiču i na memoriju. Iz ovog razloga je neophodno na odgovarajući način apstrahovati memoriju.
 
     \item \textbf{Rešavanje ograničenja}: SMT rešavaču može biti potrebno mnogo vremena da reši neka kompleksna ograničenja (formule logike prvog reda). Pitanje je na koji način smanjiti broj poziva rešavaču kako bi i samo simboličko izvršavanje bilo što je moguće efikasnije.
     
@@ -332,7 +331,7 @@ Posmatrajmo primer prikazan kroz listing \ref{lst:eksterna_2}. Pretpostavimo da 
 
 U ovom primeru imamo slučaj gde funkcija $foo$ poziva funkciju $pow$ koja vraća kvadrat svog prvog argumenta. Neka je alat generisao $a = 5$ kao ulazni podatak. Kako uslov u naredbi grananja nije ispunjen, rešavač će otkriti da je potrebno negirati uslov $a \geq 0$. Novi ulazni podatak bi mogao da bude $a = -5$. Međutim, ni na ovaj način se neće desiti da je uslov u naredbi grananja ispunjen. Alat nema mogućnost da otkrije da je nemoguće da dođe do greške, tj. da je naredba u kojoj dolazi do greške nedostižna. 
 
-Na osnovu prethodnih primera možemo videti da postoje problemi u dinamičkom simboličkom izvršavanju. Neotkrivanje nekih interesantnih putanja, nemogućnost otkrivanja nedostižnog koda. Pozivi eksternih funkcija, kastovanje i simboličkli pokazivači su neki od najvažnijih aspekata o kojima se mora voditi računa prilikom dinamičkog simboličkog izvršavanja kako ne bi došlo do divergencije putanja.\footnote[1]{Divergencija putanja je pojava u dinamičkom simboličkom izvršavanju gde izvršavanje vodi nekom neočekivanom putanjom. Recimo u primeru \ref{lst:eksterna_3} bi bilo očekivano da negacijom uslova grananja bude otkrivena nova putanja, međutim to se nikada neće desiti jer je kvadrat bilo kog broja uvek pozitivan broj.}
+Na osnovu prethodnih primera možemo videti da postoje problemi u dinamičkom simboličkom izvršavanju. Neotkrivanje nekih interesantnih putanja, nemogućnost otkrivanja nedostižnog koda. Pozivi eksternih funkcija, kastovanje i simboličkli pokazivači su neki od najvažnijih aspekata o kojima se mora voditi računa prilikom dinamičkog simboličkog izvršavanja kako ne bi došlo do divergencije putanja.\footnote[2]{Divergencija putanja je pojava u dinamičkom simboličkom izvršavanju gde izvršavanje vodi nekom neočekivanom putanjom. Recimo u primeru \ref{lst:eksterna_3} bi bilo očekivano da negacijom uslova grananja bude otkrivena nova putanja, međutim to se nikada neće desiti jer je kvadrat bilo kog broja uvek pozitivan broj.}
 
 \subsection{Selektivno simboličko izvršavanje}
 Postoji i drugačiji pristup konkoličkom simboličkom izvršavanju koji vrši alat za selektivno simboličko izvršavanje (eng. \textit{Selective Symbolic Execution} ili $S^2E$). Kod ovog alata simboličko i konkretno izvršavanje se kombinuju na drugačiji način u odnosu na dinamičko simboličko izvršavanje. Neka postoje dve funkcije $A$ i $B$ pri čemu funkcija $A$ poziva funkciju $B$.
@@ -352,7 +351,7 @@ Ovakav pristup utiče i na saglasnost i na kompletnost rezultata.
 \end{description} 
 \bigskip
 \subsection{Simboličko izvršavanje unazad} 
-Još jedan vid simboličkog izvršavanja je simboličko izvršavanje unazad (eng Symbolic Backward Execution ili $SBE$). Osnovna ideja ovog pristupa je da se krene od neke naredbe u kodu i da se izvršavanje kreće ka ulazu, tj. početku rada programa. Ova tehnika se obično koristi kada je potrebno odrediti pod kojim uslovima se može doći do neke konkretne naredbe u kodu, i kojom se putanjom do nje stiže. Osnovna mana ovog pristupa je što je neophodno da postoji graf (stablo) izršavanja samog programa, a konstrukcija tog grafa je često izuzetno skupa i komplikovana operacija.
+Još jedan vid simboličkog izvršavanja je simboličko izvršavanje unazad (eng. \textit{Symbolic Backward Execution} ili \textit{SBE}). Osnovna ideja ovog pristupa je da se krene od neke naredbe u kodu i da se izvršavanje kreće ka ulazu, tj. početku rada programa. Ova tehnika se obično koristi kada je potrebno odrediti pod kojim uslovima se može doći do neke konkretne naredbe u kodu, i kojom se putanjom do nje stiže. Osnovna mana ovog pristupa je što je neophodno da postoji graf (stablo) izršavanja samog programa, a konstrukcija tog grafa je često izuzetno skupa i komplikovana operacija.
 
 \section{Algoritmi simboličkog izvršavanja}
 
@@ -379,7 +378,7 @@ Vreme je često ograničavajući faktor kada govorimo o analizi realnog softvera
 \subsection{Slučajan odabir narednog stanja} 
 Slučajan odabir narednog stanja je strategija kod koje se naredno stanje koje će biti obrađeno bira na potpuno slučajan način. Od svih trenutno dostupnih stanja u stablu pretarge na slučajan način se bira jedno od njih. Ova ideja je sama po sebi jako loša jer nema konkretne strategije po kojoj bira sledeće stanje, međutim često se dodatno obogaćuje različitim heuristikama. 
 
-Heursitke koje postoje u okviru alata KLEE su:
+Neke poznate heuristike su:
 
 \begin{description}
     \item \textbf{Izvršavanje vođeno pokrivenošću koda} - osnovna ideja ove heuristike je da se za svaku putanju određuje njena važnost na osnovu toga koliko instrukcija je u određenoj putanji izvršeno od otkrivanja poslednje nove instrukcije, koliko je udaljena naredna neposećena instrukcija i slično.
@@ -388,7 +387,7 @@ Heursitke koje postoje u okviru alata KLEE su:
     
     \item \textbf{Izvršavanje stanja najbližeg instrukciji} - ova heuristika se obično koristi kada je potrebno doći do određene instrukcije u samom kodu. Uvek se bira ono stanje koje je najbliže traženoj naredbi. Malo podseća na pretragu vođenu pokrivenošću koda, međutim razlika je u tome da u ovoj strategiji težimo jednoj konkretnoj naredbi, a ne pokrivenosti celokupnog koda.
     
-    \item \textbf{Iscrpljivanje petji} - osnovna ideja ove heuristike je da se biraju putanje koje sadrže petlje. Opravdanje se krije u opažanju da u praksi veliki broj grešaka u radu sa petljama vodi ka prekoračenju bafera\footnote[2]{Prekoračenje bafera je pojva gde prilikom upisivanja podataka u bafer dolazi do pisanja van njegovih granica. Odnosno, podaci se smeštaju na susedne lokacije, u memoriju gde ne bi trebalo da se nalaze.} i drugim memorijskim problemima.
+    \item \textbf{Iscrpljivanje petji} - osnovna ideja ove heuristike je da se biraju putanje koje sadrže petlje. Opravdanje se krije u opažanju da u praksi veliki broj grešaka u radu sa petljama vodi ka prekoračenju bafera\footnote[3]{Prekoračenje bafera je pojva gde prilikom upisivanja podataka u bafer dolazi do pisanja van njegovih granica. Odnosno, podaci se smeštaju na susedne lokacije, u memoriju gde ne bi trebalo da se nalaze.} i drugim memorijskim problemima.
     
     \item \textbf{Prvo putanje sa greškama} - kod ove heuristike se prvo izučavaju one putanje kod kojih su u nekim ranijim delovima pronađene sitne greške (eng. \textit{bugs}). Intuicija iza ovog pristupa je da ako je putanja u ranijem delu imala neku grešku nije dovoljno dobro istestirana.
 \end{description}
@@ -496,7 +495,7 @@ Ukoliko u nekom stanju nema naredbe grananja, vrši se samo evolucija stanja. Ov
 \subsection{Specifičnosti pretrage grafa u širinu u alatu KLEE} 
 Pored pretrage grafa u dubinu u alatu KLEE je implementiran i algoritam pretarge grafa u širinu, odnosno BFS (algoritam je opisan u delu \ref{BFS}).
 
-Pretpostavimo da je stablo stanja potpuno binarno stablo\footnote[3]{Svi čvorovi osim listova imaju tačno dva potomka} kao i da se izvršavanje nalazi na nivou dva gde imamo osam čvorova (stanja). Dodatno, pretpostavimo da je memorija ograničavajući faktor u toj meri da neka stanja moraju biti odbačena jer je nema dovoljno da se izvrši sve do kraja. Neka na narednom nivou nakon grananja prvog stanja (krajnji levi čvor na nivou) može doći do greške u evoluiranom stanju. DFS neće biti u stanju da pronađe ovu grešku jer će birati uvek poslednje stanje i kretaće se njime do samog kraja. S druge strane, BFS algoritam će izvršti svih osam stanja drugog nivoa i nakon toga će biti u stanju da već kod narednog stanja (evoluiranog) pronađe grešku. 
+Pretpostavimo da je stablo stanja potpuno binarno stablo\footnote[4]{Svi čvorovi osim listova imaju tačno dva potomka} kao i da se izvršavanje nalazi na nivou dva gde imamo osam čvorova (stanja). Dodatno, pretpostavimo da je memorija ograničavajući faktor u toj meri da neka stanja moraju biti odbačena jer je nema dovoljno da se izvrši sve do kraja. Neka na narednom nivou nakon grananja prvog stanja (krajnji levi čvor na nivou) može doći do greške u evoluiranom stanju. DFS neće biti u stanju da pronađe ovu grešku jer će birati uvek poslednje stanje i kretaće se njime do samog kraja. S druge strane, BFS algoritam će izvršti svih osam stanja drugog nivoa i nakon toga će biti u stanju da već kod narednog stanja (evoluiranog) pronađe grešku. 
 
 U alatu KLEE interna implementacija algoritma pretrage u širinu koristi dek pokazivača na stanja koja se izvršavaju, kako bi operacije skidanja sa početka i dodavanja na kraj bile efikasne. Slično kao kod algoritma DFS, i BFS samo vrši evoluciju stanja kada dođe do grananja. Ako postoji stanje A u kome se vrši grananje, u sledećem koraku treba da postoje stanja B i C. Stanje B će biti zapravo samo evoluirano stanje A, dok će stanje C biti novo stanje koje se kreira i dodaje na \textbf{kraj} deka stanja kao što se to i obično radi kod algoritma pretrage grafa u širinu. 
 
@@ -537,6 +536,35 @@ Beč (eng. \textit{Batch}) predstavlja dodatak bilo kom od prethodno navedenih a
     \item Ako određeno vreme nema novootkrivene instrukcije, pređi na neku drugu putanju.
 \end{itemize}
 Beč dodatak se može koristiti uz bilo koji od ranije navedenih algoritama, ali se najčešće koristi u kombinaciji sa algoritmom \textit{težinskog slučajnog biranja narednog stanja} i heuristikom \textit{udaljenost najbliže neotkrivene instrukcije}. U tom slučaju su dobijeni rezultati najbolji.
+
+\section{Instalacija i upotreba alata}
+
+Kako bi bilo moguće korišćenje alata KLEE prethodno ga je neophodno instalirati na računar. Sva potrebna uputstva za instalaciju samog alata i dodataka koji su neophodni za njegov rad se mogu naći na adresi \url{http://klee.github.io/}.
+
+KLEE kao ulazni fajl očekuje LLVM\cite{llvm} k\^od odogvarajućeg programa, koji ima ekstenziju \texttt{.bc.} Kako bi bio dobijen odgovarajući kod sa odgovarajućom ekstenzijom potrebno je koristiti Clang \cite{clang}. Komanda kojom se dobija LLVM k\^od programa je \texttt{clang -emit-llvm -c -g program.c}. Upotrebom ove komande nastaje odgovarajući fajl sa imenom \textit{program.bc}. Ovaj fajl se dalje koristi uz alat KLEE kako bi se simbolički izvršio program \textit{program.c}.
+
+Alat KLEE se može pokrenuti iz komandne linije komandom \texttt{klee even.bc}. KLEE kreira direktorijum u koji smešta sve fajlove koji nastanu njegovim izvršavanjem. Fajlovi koji nastaju predstavljaju upozorenja koja je proizveo alat, interne poruke koje su nastala izvršavanjem i skup fajlova sa ekstenzijom \texttt{.ktest} koji predstavljaju ulazne vrednosti podataka za koje je neka putanja bila izvršena. Ukoliko se desila greška na nekoj putanji prilikom simboličkog izvršavanja, tj. ukoliko može doći do greške prilikom izvršavanja programa generiše se fajla sa ekstenzijom \texttt{.exec.err} gde se mogu naći dodatne informacije o grešci. Neke od mogućih grešaka su:
+
+\begin{description}
+    \item \textbf{div} - Deljenje nulom ili računanje po modulu 0.
+    
+    \item \textbf{assert} - Uslov proveravan funkcijom \textit{assert} nije tačan.
+    
+    \item \textbf{ptr} - Čitanje ili pisanje u nevalidnu memorijsku lokaciju.
+    
+    \item \textbf{free} - Dupli ili nekorektan poziv funkcije \textit{free}.
+\end{description}
+
+Takođe, kao izlaz je moguće dobiti i informacije o broju izvršenih instrukcija, utoršenom vremenu, procentu pokrivenosti instrukcija u kodu, procentu pokrivenosti grana u kodu, ukupnom broju LLVM instrukcija koje postoje u bajt kodu i vreme koje je bilo utrošeno za rešavanje ograničenja SMT rešavačem. Ovi podaci se dobijaju komandom \texttt{klee-stats ime\_direktorijuma}, gde \textit{ime\_direktorijuma} predstavlja naziv direktorijuma koji je KLEE kreirao za konkretno izvršavanje.
+
+Primer izlaza za komandu textit{mv} je prikazan na slici \ref{primer_mv}. 
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\linewidth]{mv_izlaz.png}
+    \caption{Izlaz alata KLEE za izvršavanje komande mv GNU Coreutils-a.}
+    \label{fig:mv}
+\end{figure}
 
 \newpage
 
