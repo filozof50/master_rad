@@ -16,6 +16,7 @@
 \addbibresource{literatura.bib} % The filename of the bibliography
 \usepackage[autostyle=true]{csquotes} % Required to generate language-dependent quotes in the bibliography
 \usepackage{array}
+\usepackage{float}
 \newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1}}
 
 % Paket koji definiše sve specifičnosti mastera Matematičkog fakulteta
@@ -387,11 +388,11 @@ Slučajan odabir narednog stanja je strategija kod koje se naredno stanje koje �
 Neke poznate heuristike su:
 
 \begin{description}
-    \item \textbf{Izvršavanje vođeno pokrivenošću koda} - osnovna ideja ove heuristike je da se za svaku putanju određuje njena važnost na osnovu toga koliko instrukcija je u određenoj putanji izvršeno od otkrivanja poslednje nove instrukcije, koliko je udaljena naredna neposećena instrukcija i slično.
+    \item \textbf{Izvršavanje vođeno pokrivenošću koda} - osnovna ideja ove heuristike je da se za svaku putanju određuje njena važnost na osnovu toga koliko naredbi je u određenoj putanji izvršeno od otkrivanja poslednje nove naredbe, koliko je udaljena naredna neposećena naredba i slično.
     
     \item \textbf{Izvršavanje vođeno podputanjama} - ideja je birati ono stanje koje vodi podputanjom koja je bila izvršena manji broj puta do tog trenutka. Podputanja se definiše kao $n$ uzasptonih naredbi u okviru jedne putanje. Kod ove heuristike ključnu ulogu igra odabir vrednosti $n$. Do sada nije pronađena optimalna vrednost parametra $n$ koja je univerzalna.
     
-    \item \textbf{Izvršavanje stanja najbližeg instrukciji} - ova heuristika se obično koristi kada je potrebno doći do određene instrukcije u samom kodu. Uvek se bira ono stanje koje je najbliže traženoj naredbi. Malo podseća na pretragu vođenu pokrivenošću koda, međutim razlika je u tome da u ovoj strategiji težimo jednoj konkretnoj naredbi, a ne pokrivenosti celokupnog koda.
+    \item \textbf{Izvršavanje stanja najbližeg naredbi} - ova heuristika se obično koristi kada je potrebno doći do određene naredbe u samom kodu. Uvek se bira ono stanje koje je najbliže traženoj naredbi. Malo podseća na pretragu vođenu pokrivenošću koda, međutim razlika je u tome da u ovoj strategiji težimo jednoj konkretnoj naredbi, a ne pokrivenosti celokupnog koda.
     
     \item \textbf{Iscrpljivanje petji} - osnovna ideja ove heuristike je da se biraju putanje koje sadrže petlje. Opravdanje se krije u opažanju da u praksi veliki broj grešaka u radu sa petljama vodi ka prekoračenju bafera\footnote[3]{Prekoračenje bafera je pojva gde prilikom upisivanja podataka u bafer dolazi do pisanja van njegovih granica. Odnosno, podaci se smeštaju na susedne lokacije, u memoriju gde ne bi trebalo da se nalaze.} i drugim memorijskim problemima.
     
@@ -418,7 +419,7 @@ Postoji veliki broj različitih alata za simboličko izvršavanje. Većina ovih 
 \bigskip
 Na osnovu toga da li pokušavaju da obrade veći broj putanja odjednom ili jednu po jednu alati za simboličko izvršavanje se mogu podeliti u dve grupe:
 \begin{description}
-    \item \textbf{\textit{online} alati} - alati koji pokušavaju da izvršavaju i izučavaju veći broj putanja odjednom. Kada god se naiđe na grananje vrši se kloniranje trenutnog stanja. Dobra strana ovih alata je što nema ponavljanja posla jer se jednom izvršena instrukcija nikada ne izvršava ponovo. Loša strana je to što veoma brzo pune memoriju koja im je dodeljena, jer moraju da održavaju veliki broj putanja i stanja. Na primer ako imamo uslov grananja $x > 3$, putanja se deli na dve disjunktne putanje. U jednoj će važiti $\pi \land x > 3$ a u drugoj negacija tog uslova, odnosno $\pi \land x \leq 3$. Na ovaj način se prolazi kroz obe putanje. Primeri ovakvih alata su KLEE \cite{klee}, AEG \cite{aeg}, S$^2$E \cite{s2e}.
+    \item \textbf{\textit{online} alati} - alati koji pokušavaju da izvršavaju i izučavaju veći broj putanja odjednom. Kada god se naiđe na grananje vrši se kloniranje trenutnog stanja. Dobra strana ovih alata je što nema ponavljanja posla jer se jednom izvršena naredba nikada ne izvršava ponovo. Loša strana je to što veoma brzo pune memoriju koja im je dodeljena, jer moraju da održavaju veliki broj putanja i stanja. Na primer ako imamo uslov grananja $x > 3$, putanja se deli na dve disjunktne putanje. U jednoj će važiti $\pi \land x > 3$ a u drugoj negacija tog uslova, odnosno $\pi \land x \leq 3$. Na ovaj način se prolazi kroz obe putanje. Primeri ovakvih alata su KLEE \cite{klee}, AEG \cite{aeg}, S$^2$E \cite{s2e}.
     
     \item \textbf{\textit{offline} alati} - za razliku od \textit{online} alata, \textit{offline} alati izvršavaju jednu po jednu putanju. Primer ovakvog alata je SAGE \cite{sage}. Ideja je izvršiti celu jednu putanju do samog kraja, a zatim preći na neku drugu. Dobra strana ovog pristupa je jako malo korišćenje memorije jer se čuvaju stanja vezana za samo jednu putanju, ali je problem što obično ima mnogo ponavljanja posla. Pretraga nove putanje uglavnom kreće od samog početka. Opšti princip rada \textit{offline} alata je da kreću sa konkretnim izvršavanjem, što znači da je potrebno generisati ulazne podatke. Pamti se put kojim se prošlo pri konkretnom izvršavanju, a zatim se isti put prolazi simbolički. 
     
@@ -463,12 +464,13 @@ Pored koncepta hibridnog alata, Mayhem još uvodi i memoriju zasnovanu na indeks
 \section{Memorijski model} \label{memorija}
 KLEE čuva vrednosti različitih promenljivih u skladištima. Postoje dva skladišta u okviru alata. 
 \begin{description}
-    \item \textbf{konkretno} - skladište u okviru kog se čuvaju vrednosti konkretnih promenljivih. To su konstante ili promenljive kojima je dodeljena vrednost u kodu. Na primer, naredba \texttt{int x=5;} definise jednu konkretnu promenljivu. Ukoliko se desi da se vrši dodela vrednosti konkretnoj promenljivoj kao rezultat izračunavanja u kome je učestvovala simbolička promenljiva, onda i konkretna promenljiva postaje simbolička. S druge strane, ukoliko se vrši neko izračunavanje nad simboličkom i konkretnom promenljivom, a rezultat se dodeljuje simboličkoj promenljivoj, to ne utiče na konkretnu promenljivu, i ona ostaje kakva je i bila pre ovog izračunavanja.
+    \item \textbf{konkretno} - skladište u okviru kog se čuvaju vrednosti konkretnih promenljivih. To su konstante ili promenljive kojima je dodeljena vrednost u kodu. Na primer, naredba \texttt{int x=5;} definiše jednu konkretnu promenljivu. Ukoliko se desi da se vrši dodela vrednosti konkretnoj promenljivoj kao rezultat izračunavanja u kome je učestvovala simbolička promenljiva, onda i konkretna promenljiva postaje simbolička. S druge strane, ukoliko se vrši neko izračunavanje nad simboličkom i konkretnom promenljivom, a rezultat se dodeljuje simboličkoj promenljivoj, to ne utiče na konkretnu promenljivu, i ona ostaje kakva je i bila pre ovog izračunavanja.
     
     \item \textbf{simboličko} - skladište gde se čuvaju simboličke promenljive. Kako one nemaju konkretne vrednosti sve do trenutka kada se dođe u završno stanje, veći deo vremena se čuva samo njihova adresa. Kada se dođe u završno stanje, potrebno je generisati konkretne vrednosti simboličkih promenljivih na osnovu uslova koji važe u tom stanju. U tom trenutku one dobijaju konkretne vrednosti, i generiše se test primer koji govori o tome koje su vrednosti promenljivih kada se program izvrši kretanjem kroz određenu putanju. Te vrednosti ne moraju biti jednistvene, npr ako u stanju važi uslov $x > 5$ promenljiva $x$ može uzeti bilo koju vrednost koja je veća od $5$. Ukoliko u nekom stanju dolazi do greške pod uslovom $x = 7$ onda će vrednost promenljive $x$ koja se generiše u tom stanju biti baš $7$.
 \end{description}
 \bigskip
-Količina radne memorije koja se dodeljuje samom alatu je ograničena i zadaje se kao jedan od parametara prilikom pokretanja samog KLEE-a. Zbog osobine alata da čuva sva stanja koja su vezana za sve putanje koje se izučavaju vrlo često dolazi do situacije gde se memorija popuni. Kada se ovo desi na neki način mora da dođe do ,,pražnjenja''. To se radi tako što se odbacuju neka stanja. Broj stanja koja se izbacuju se određuje slučajnom metodom. Generiše se pseudo-slučajan broj i on predstavlja broj stanja koja se izbacuju. Neophodno je znati na koji način se biraju stanja koja bivaju izbačena. Ovaj postupak je takođe slučajan uz još jedan dodatan uslov, a to je da se ne izbacuju stanja koja su otkrila novu instrukciju. Generiše se pseudo-slučajan broj koji govori o indeksu stanja u nizu koje treba da bude izbačeno i ako u njemu nije otkrivena nova instrukcija ono može biti izbačeno. U suprotnom se generiše nov indeks i bira se drugo stanje za izbacivanje iz skupa aktivnih stanja.
+Količina radne memorije koja se dodeljuje samom alatu je ograničena i zadaje se kao jedan od parametara prilikom pokretanja samog KLEE-a. Zbog osobine alata da čuva sva stanja koja su vezana za sve putanje koje se izučavaju vrlo često dolazi do situacije gde se memorija popuni. Kada se ovo desi na neki način mora da dođe do ,,pražnjenja''. To se radi tako što se odbacuju neka stanja. Broj stanja koja se izbacuju se određuje slučajnom metodom. Generiše se pseudo-slučajan broj i on predstavlja broj stanja koja se izbacuju. 
+Neophodno je definisati na koji način se biraju stanja koja bivaju izbačena. Ovaj postupak je takođe slučajan uz još jedan dodatan uslov, a to je da se ne izbacuju stanja koja su otkrila novu naredbu. Generiše se pseudo-slučajan broj koji govori o indeksu stanja u nizu koje treba da bude izbačeno i ako u njemu nije otkrivena nova naredba ono može biti izbačeno. U suprotnom se generiše nov indeks i bira se drugo stanje za izbacivanje iz skupa aktivnih stanja.
 
 \section{Kontrola toka programa}
 Rad sa funkcijama u alatu KLEE liči na standardni rad sa funkcijama u nekom programskom jeziku. Ukoliko je potrebno simbolički izvršiti funkciju $f$, koja se poziva iz funkcije $g$ sa parametrom $a$ bez povratne vrednosti (\texttt{void f(int a)}), izvršavanje se vrši na sledeći način. U okviru alata postoji ,,stek'' na kome se čuvaju lokalne promenljive i parametri funkcije $f$. Takođe se pamti koja je funkcija pozivalac kao i koju naredbu funkcije $g$ treba izvršiti nakon što $f$ bude izvršena. Sve promenljive se i dalje čuvaju u ranije opisanim skladištima. Nakon što se završi izvršavanje funkcije, memorija na kojoj su se nalazile lokalne promenljive postaje ,,slobodna'', odnosno tu je moguće smeštati nove promenljive neke nove funkcije. 
@@ -487,7 +489,7 @@ Rad sa nizovima podseća na rad sa pokazivačima. Suština obe tehnike je ista. 
 \section{Algoritmi pretrage stabla stanja} \label{algoritmi}
 KLEE kao i većina drugih alata u okviru svoje implementacije sadrži vreći broj algoritama za pretragu grafa (stabla) stanja simboličkog izvršavanja. Alat se svrstava u grupu \textit{online} alata što znači da bez obzira na to koji se konkretan algoritam koristi za analizu nekog koda, sve putanje i sva stanja koja su vezana za njih će biti čuvani tokom izvršavanja (dok se putanja ne završi čime se brišu sva stanja vezana za nju pa i ona sama).
 
-U internoj implementaciji alata KLEE postoji \textit{evolucija} stanja. Ovaj pojam označava transformaciju jednog stanja u drugo. Za svako stanje se između ostalog čuva trenutna instrukcija koja se izvršava, naredna instrukcija koja treba da bude izvršena, kao i ograničenja koja treba da važe u trenutnom stanju. Kada dolazi do evolucije stanja, ne kreira se novo stanje, već se u okviru postojećeg menjaju trenutna i naredna instrukcija. Takođe se menja i ograničenje usled izvršavanja nove naredbe i evolucije stanja. Na ovaj način nije potrebno instancirati objekte klase kojom se stanje predstavlja, niti je potrebno vršiti izmene u strukturama podataka u kojima se stanja čuvaju.
+U internoj implementaciji alata KLEE postoji \textit{evolucija} stanja. Ovaj pojam označava transformaciju jednog stanja u drugo. Za svako stanje se između ostalog čuva trenutna naredba koja se izvršava, naredna naredba koja treba da bude izvršena, kao i ograničenja koja treba da važe u trenutnom stanju. Kada dolazi do evolucije stanja, ne kreira se novo stanje, već se u okviru postojećeg menjaju trenutna i naredna naredba. Takođe se menja i ograničenje usled izvršavanja nove naredbe i evolucije stanja. Na ovaj način nije potrebno instancirati objekte klase kojom se stanje predstavlja, niti je potrebno vršiti izmene u strukturama podataka u kojima se stanja čuvaju.
 
 \subsection{Specifičnosti pretrage grafa u dubinu u alatu KLEE}
 Jedan od osnovnih algoritama pretrage grafa stanja u alatu KLEE je algoritam pretarge grafa u dubinu, odnosno DFS (algoritam je opisan u delu \ref{DFS}). Uobičajena implementacija algoritma DFS je rekurzivna. U implementaciji u alatu KLEE nema rekurzije niti steka kojim bi se ona simulirala, već se algoritam izvršava pomoću niza.
@@ -505,7 +507,7 @@ Pretpostavimo da je stablo stanja potpuno binarno stablo\footnote[4]{Svi čvorov
 
 U alatu KLEE interna implementacija algoritma pretrage u širinu koristi dek pokazivača na stanja koja se izvršavaju, kako bi operacije skidanja sa početka i dodavanja na kraj bile efikasne. Slično kao kod algoritma DFS, i BFS samo vrši evoluciju stanja kada dođe do grananja. Ako postoji stanje A u kome se vrši grananje, u sledećem koraku treba da postoje stanja B i C. Stanje B će biti zapravo samo evoluirano stanje A, dok će stanje C biti novo stanje koje se kreira i dodaje na \textbf{kraj} deka stanja kao što se to i obično radi kod algoritma pretrage grafa u širinu. 
 
-Ukoliko u stanju nema grananja, ono će samo evoluirati u novo stanje dodavanjem ograničenja i menjanjem odgovarajućih instrukcija kao i u algoritmu pretragu u dubinu. Razlika u odnosu na algoritam DFS je ta što evoluirano stanje neće ostati na istoj poziciji u redu stanja već će se prebaciti na kraj reda kako bi sva ostala stanja na istom nivou u stablu bila izvršena pre njega. Ovim postupkom ovo stanje ,,prelazi'' u naredni nivo što i jeste očekivano ponašanje. 
+Ukoliko u stanju nema grananja, ono će samo evoluirati u novo stanje dodavanjem ograničenja i menjanjem odgovarajućih naredbi kao i u algoritmu pretragu u dubinu. Razlika u odnosu na algoritam DFS je ta što evoluirano stanje neće ostati na istoj poziciji u redu stanja već će se prebaciti na kraj reda kako bi sva ostala stanja na istom nivou u stablu bila izvršena pre njega. Ovim postupkom ovo stanje ,,prelazi'' u naredni nivo što i jeste očekivano ponašanje. 
 
 \subsection{Slučajan odabir narednog stanja} 
 Verovatno najjednostavniji ali retko korišćen algoritam za pretragu stabla stanja je algoritam slučajnog odabira narednog stanja. Naredno stanje koje će biti izvršeno se bira slučajno (eng. \textit{random}) iz skupa dostupnih stanja. Interna implementacija ovog algoritma čuva pokazivače na stanja u nizu. 
@@ -519,17 +521,19 @@ Interna implementacija ovog algoritma koristi implementaciju crveno crnog stabla
 
 Slično kao i u drugim algoritmima u okviru alata KLEE, ukoliko postoji grananje u nekom stanju ono evoluira i dodaje se jedno novo stanje, a ukoliko nema grananja trenutnom stanju se menjaju \textit{trenutna} i \textit{sledeća} naredba, kao i formula logike prvog reda $\pi$, (ukoliko je došlo do promene vrednosti neke simboličke promenljive u stanju) koja čuva ograničenja koja važe u stanju tj. putanji kojoj stanje pripada. Svako od stanja dobija određenu težinu zavisno od heuristike koja se koristi i stanja se u stablo ubacuju na osnovu težine, i to tako što se pri ubacivanju stanja ono smešta u list, a zatim zavisno od pozicije \textit{crvenih} i \textit{crnih} čvorova može doći do rotacija čvorova unutar stabla. Svaki put kada se neko stanje doda u stablo, njegova težina se propagira uz put kojim se došlo do pozicije na kojoj se čvor smestio u stablu. Samim tim koren stabla čuva sumu svih težina čvorova u stablu. 
 
-Naredno stanje koje se izvršava se bira na slučajan način. Najpre se genriše slučajan broj $p$ iz intervala $[0, 1)$. Zatim se težina korena pomnoži ovom vrednošću čime se dobija težina $w$. Dok god postoji levi sin i njegova težina je veća od $w$ ide se levo niz stablo. Vrednost $w$ se poredi sa vrednošću koja predstavlja težinu u levom sinu treutnog čvora. Ukoliko je ta težina manja, $w$ se umanjuje za tu vrednost. Ako se dođe do čvora $u$, u kom važi $w < w_n$ pri čemu $w_n$ predstavlja težinu trenutnog čvora, naredno stanje koje se izvršava je baš ono koje se nalazi u čvoru $u$. Inače, ide se desno niz stablo pri čemu se vrednost $w$ pri svakom spuštanju umanjuje za težinu desnog potomka u koji se pretraga spušta. Detaljinije o operacijama dodavanja i biranja narednog stanja se može naći u \cite{klee}. Heursitke koje postoje u okviru alata KLEE su:
+Naredno stanje koje se izvršava se bira na slučajan način. Najpre se genriše slučajan broj $p$ iz intervala $[0, 1)$. Zatim se težina korena pomnoži ovom vrednošću čime se dobija težina $w$. Dok god postoji levi sin i njegova težina je veća od $w$ ide se levo niz stablo. Vrednost $w$ se poredi sa vrednošću koja predstavlja težinu u levom sinu trenutnog čvora. Ukoliko je ta težina manja, $w$ se umanjuje za tu vrednost. Ako se dođe do čvora $u$, u kom važi $w < w_n$ pri čemu $w_n$ predstavlja težinu trenutnog čvora, naredno stanje koje se izvršava je baš ono koje se nalazi u čvoru $u$. Inače, ide se desno niz stablo pri čemu se vrednost $w$ pri svakom spuštanju umanjuje za težinu desnog potomka u koji se pretraga spušta. Detaljinije o operacijama dodavanja i biranja narednog stanja se može naći u \cite{klee}. 
+
+Heuristike koje postoje u okviru alata KLEE su:
 \begin{description}
     \item\textbf{Dubina stanja} - težina stanja se određuje kao dubina na kojoj se nalazi stanje, tj. nivo u stablu na kom se nalazi čvor koji čuva odgovarajuće stanje.
     
     \item\textbf{Slučajan odabir putanje} - težina stanja se određuje kao $(\frac{1}{2}) ^ d$ gde je $d$ nivo stabla na kom se nalazi stanje.
     
-    \item\textbf{Broj instrukcija} - heuristika koja stanju dodeljuje težinu na osnovu broja instrukcija koje su izvršene da bi se do njega došlo.
+    \item\textbf{Broj naredbi} - heuristika koja stanju dodeljuje težinu na osnovu broja naredbi koje su izvršene da bi se do njega došlo.
     
     \item\textbf{Cena upita} - težina stanju se dodeljuje na osnovu vremena koje je potrebno da se izvrši upit (provera zadovoljivosti formule logike prvog reda pomoću SMT rešavača).
     
-    \item\textbf{Udaljenost najbliže neotkrivene instrukcije} - najkorišćenija heuristika u alatu KLEE i heuristika koja je preporučena od strane autora alata. Ona daje najveću pokrivenost koda. Težina stanja se određuje na osnovu udaljenosti trenutnog stanja od najbliže neotkrivene (do tada neizvršene) naredbe. Što je stanje bliže neotkrivenoj instrukciji to je težina koja mu se dodeljuje veća. 
+    \item\textbf{Udaljenost najbliže neotkrivene naredbe} - najkorišćenija heuristika u alatu KLEE i heuristika koja je preporučena od strane autora alata. Ona daje najveću pokrivenost koda. Težina stanja se određuje na osnovu udaljenosti trenutnog stanja od najbliže neotkrivene (do tada neizvršene) naredbe. Što je stanje bliže neotkrivenoj naredbi to je težina koja mu se dodeljuje veća. 
 \end{description}
 
 \bigskip
@@ -537,17 +541,17 @@ Naredno stanje koje se izvršava se bira na slučajan način. Najpre se genriše
 \subsection{Dodaci pretrazi} 
 Beč (eng. \textit{Batch}) predstavlja dodatak bilo kom od prethodno navedenih algoritama. Postoje dva dodatka:
 \begin{itemize}
-    \item Ako određeni broj instrukcija bude izvršen bez otkrivanja nove instrukcije, pređi na neku drugu putanju.
+    \item Ako određeni broj naredbi bude izvršen bez otkrivanja nove naredbe, pređi na neku drugu putanju.
     
-    \item Ako određeno vreme nema novootkrivene instrukcije, pređi na neku drugu putanju.
+    \item Ako određeno vreme nema novootkrivene naredbe, pređi na neku drugu putanju.
 \end{itemize}
-Beč dodatak se može koristiti uz bilo koji od ranije navedenih algoritama, ali se najčešće koristi u kombinaciji sa algoritmom \textit{težinskog slučajnog biranja narednog stanja} i heuristikom \textit{udaljenost najbliže neotkrivene instrukcije}. U tom slučaju su dobijeni rezultati najbolji.
+Beč dodatak se može koristiti uz bilo koji od ranije navedenih algoritama, ali se najčešće koristi u kombinaciji sa algoritmom \textit{težinskog slučajnog biranja narednog stanja} i heuristikom \textit{udaljenost najbliže neotkrivene naredbe}. U tom slučaju su dobijeni rezultati najbolji.
 
 \section{Instalacija i upotreba alata} \label{instalacija}
 
-Kako bi bilo moguće korišćenje alata KLEE prethodno ga je neophodno instalirati na računar. Sva potrebna uputstva za instalaciju samog alata i dodataka koji su neophodni za njegov rad se mogu naći na adresi \url{http://klee.github.io}.
+Kako bi bilo moguće korišćenje alata KLEE prethodno ga je neophodno instalirati . Sva potrebna uputstva za instalaciju samog alata i dodataka koji su neophodni za njegov rad se mogu naći na adresi \url{http://klee.github.io}.
 
-KLEE kao ulazni fajl očekuje LLVM\cite{llvm} k\^od odogvarajućeg programa, koji ima ekstenziju \texttt{.bc.} Kako bi bio dobijen odgovarajući kod sa odgovarajućom ekstenzijom potrebno je koristiti Clang \cite{clang}. Komanda kojom se dobija LLVM k\^od programa je \texttt{clang -emit-llvm -c -g program.c}. Upotrebom ove komande nastaje odgovarajući fajl sa imenom \textit{program.bc}. Ovaj fajl se dalje koristi uz alat KLEE kako bi se simbolički izvršio program \textit{program.c}.
+KLEE kao ulazni fajl očekuje LLVM \cite{llvm} k\^od odogvarajućeg programa, koji ima ekstenziju \texttt{.bc.} Kako bi bio dobijen odgovarajući k\^od sa odgovarajućom ekstenzijom potrebno je koristiti Clang \cite{clang}. Komanda kojom se dobija LLVM k\^od programa je \texttt{clang -emit-llvm -c -g program.c}. Upotrebom ove komande nastaje odgovarajući fajl sa imenom \textit{program.bc}. Ovaj fajl se dalje koristi uz alat KLEE kako bi se simbolički izvršio program \textit{program.c}.
 
 Alat KLEE se može pokrenuti iz komandne linije komandom \texttt{klee program.bc}. KLEE kreira direktorijum u koji smešta sve fajlove koji nastanu njegovim izvršavanjem. Fajlovi koji nastaju predstavljaju upozorenja koja je proizveo alat, interne poruke koje su nastala izvršavanjem i skup fajlova sa ekstenzijom \texttt{.ktest} koji predstavljaju ulazne vrednosti podataka za koje je neka putanja bila izvršena. Ukoliko se desila greška na nekoj putanji prilikom simboličkog izvršavanja, tj. ukoliko može doći do greške prilikom izvršavanja programa generiše se fajla sa ekstenzijom \texttt{.exec.err} gde se mogu naći dodatne informacije o grešci. Neke od mogućih grešaka su:
 
@@ -561,7 +565,7 @@ Alat KLEE se može pokrenuti iz komandne linije komandom \texttt{klee program.bc
     \item \textbf{free} - Dupli ili nekorektan poziv funkcije \textit{free}.
 \end{description}
 
-Takođe, kao izlaz je moguće dobiti i informacije o broju izvršenih instrukcija, utrošenom vremenu, procentu pokrivenosti instrukcija u kodu, procentu pokrivenosti grana u kodu, ukupnom broju LLVM instrukcija koje postoje u bajt kodu i vreme koje je bilo utrošeno za rešavanje ograničenja SMT rešavačem. Kako bi se navedeni podaci dobili u obliku koji je prikazan na slici \ref{fig:covnew_mkdir}, potrebno je izvršiti komandu \texttt{klee-stats ime\_direktorijuma}, gde \textit{ime\_direktorijuma} predstavlja naziv direktorijuma koji je KLEE kreirao prilikom simboličkog izvršavanja. Ime odgovarajućeg direktorijuma na slici \ref{fig:covnew_mkdir} je \textit{covnew\_mkdir}.
+Takođe, kao izlaz je moguće dobiti i informacije o broju izvršenih naredbi, utrošenom vremenu, procentu pokrivenosti naredbi u kodu, procentu pokrivenosti grana u kodu, ukupnom broju LLVM instrukcija koje postoje u bajt kodu i vreme koje je bilo utrošeno za rešavanje ograničenja SMT rešavačem. Kako bi se navedeni podaci dobili u obliku koji je prikazan na slici \ref{fig:covnew_mkdir}, potrebno je izvršiti komandu \texttt{klee-stats ime\_direktorijuma}, gde \textit{ime\_direktorijuma} predstavlja naziv direktorijuma koji je KLEE kreirao prilikom simboličkog izvršavanja. Ime odgovarajućeg direktorijuma na slici \ref{fig:covnew_mkdir} je \textit{covnew\_mkdir}.
 
 \begin{figure}[ht]
     \centering
@@ -570,15 +574,21 @@ Takođe, kao izlaz je moguće dobiti i informacije o broju izvršenih instrukcij
     \label{fig:covnew_mkdir}
 \end{figure}
 
-Prilikom pokretanja alata je moguće navesti i dodatne argumente. Pomoću njih se može precizirati koji se algoritam za simboličko izvršavanje koristi, kolika je maksimalna količina memorije koja će biti dodeljena KLEE-u, maksimalno vreme izvršavanja. Takođe se programu koji se izvršava mogu proslediti simbolički argumenti, može se zahtevati da se kao izlaz generišu samo one putanje na kojima je bilo novootkrivenih naredbi. Još jedna zanimljiv parametar je onaj kojim se alatu poručuje da li da izvršava eksterne funkcije ili ne. Pored navedenih parametara, postoje i mnogi drugi koji se mogu proslediti kao argumenti alatu prilikom pokretanja. Više o njima se može naći na \url{http://klee.github.io}. Primer pokretanja alata KLEE za program \textit{mkdir}, za čije izvršavanje je generisan izlaz prikazan na slici \ref{fig:covnew_mkdir}:
+Prilikom pokretanja alata je moguće navesti i dodatne argumente. Pomoću njih se može precizirati koji se algoritam za simboličko izvršavanje koristi, kolika je maksimalna količina memorije koja će biti dodeljena KLEE-u, maksimalno vreme izvršavanja. Takođe se programu koji se izvršava mogu proslediti simbolički argumenti, može se zahtevati da se kao izlaz generišu samo one putanje na kojima je bilo novootkrivenih naredbi. Još jedna zanimljiv parametar je onaj kojim se alatu poručuje da li da izvršava eksterne funkcije ili ne. 
 
-\noindent\texttt{klee --write-cvcs --write-cov --max-memory=1000 external-calls=all \\ --only-output-states-covering-new --max-sym-array-size=4096 --max-time=720min --search=random-path --search=nurs:covnew --use-batching-search \\
---batch-instructions=10000 mkdir.bc --sym-args 0 1 10 --sym-args 0 2 2 --sym-files 1 8 --sym-stdin 8 --sym-stdout}
+Pored navedenih parametara, postoje i mnogi drugi koji se mogu proslediti kao argumenti alatu prilikom pokretanja. Više o njima se može naći na \url{http://klee.github.io}. Primer pokretanja alata KLEE za program \textit{mkdir}, za čije izvršavanje je generisan izlaz prikazan na slici \ref{fig:covnew_mkdir} je dat listingom \ref{lst:pokretanje_klee}.
+
+\begin{lstlisting}[caption={Primer pokretanja alata KLEE.}, label={lst:pokretanje_klee}, captionpos=b]
+klee --write-cvcs --write-cov --max-memory=1000 external-calls=all
+--only-output-states-covering-new --max-sym-array-size=4096 
+--max-time=720min --search=random-path --search=nurs:covnew 
+--use-batching-search --batch-instructions=10000 mkdir.bc 
+--sym-args 0 1 10 --sym-args 0 2 2 --sym-files 1 8 
+--sym-stdin 8 --sym-stdout
+\end{lstlisting}
 
 \section{Primeri rada osnovnih algoritama u okviru alata KLEE} \label{osnovni_algoritmi}
-U ovom delu će biti prikazan rad algoritama DFS i BFS na primeru koji je dat u listingu \ref{lst:primer_KLEE}. Prikazani k\^od je napisan radi ilustracije rada algoritama i ne predstavlja deo realnog, većeg softvera.
-
-\vskip 1.5in
+U ovom delu će biti prikazan rad algoritama DFS i BFS na primeru koji je dat u listingu \ref{lst:primer_KLEE}. Prikazani k\^od je napisan radi ilustracije rada algoritama i ne predstavlja deo realnog, većeg softvera. Na slici \ref{fig:moj_primer} je prikazano stablo stanja koje odgovara ovom kodu. 
 
 \begin{figure}[ht]
     \centering
@@ -590,8 +600,6 @@ U ovom delu će biti prikazan rad algoritama DFS i BFS na primeru koji je dat u 
 \begin{figure}
 \noindent\begin{minipage}[t]{.45\textwidth}
 \begin{lstlisting}[label={lst:primer_KLEE}, captionpos=b]
-
-
    void foo(int a) 
    {
      if (a > 1000) {
@@ -650,20 +658,21 @@ U ovom delu će biti prikazan rad algoritama DFS i BFS na primeru koji je dat u 
 
 \begin{figure}[ht]
     \centering
+    \includegraphics[height=1.09\linewidth]{DFS_states_1.png}
+    \caption{Pregled izgleda reda stanja tokom izvršavanja DFS algoritma. Zelenom bojom su prikazana završna stanja, a strelice predstavljaju evoluciju stanja.}
+    \label{fig:DFS_stanja}
+\end{figure}
+
+\subsection{DFS}
+Na slici \ref{fig:DFS_stanja} je prikazano na koji način se menja niz stanja izvršavanjem algoritma pretrage stabla stanja u dubinu. Stanja odgovaraju primeru \ref{lst:primer_KLEE}.  Sa slike vidimo da se na početku kreće iz stanja 1 koje evoluira u stanje 2 i dodaje se novo stanje 3 na kraj niza. Međutim, onda se bira baš stanje 3, kao poslednje u nizu kako bi se simulirala pretraga grafa u dubinu. Nakon toga, stanje 3 evoluira u stanje 6 i dodaje se novo stanje 7, dok stanje 2 ostaje i dalje u nizu ali na početku. Pretraga se nastavlja iz stanja 7 koje evoluira u stanje 14 i dodaje se stanje 15. Kako je sledeće stanje koje se izvršava broj 15, a ono je ujedno i završno stanje, samo se izbacuje iz niza i prelazi se na stanje 14. Ono je takođe završno pa se pretraga vraća na stanje 6, čime se zapravo izvršio povratak na prethodno grananje (kod stanja 3 na slici). Iz stanja 6 se dobijaju 2 završna stanja, koja nakon izvršavanja bivaju izbačena iz niza gde ostaje samo stanje 2. Primećujemo da je cela desna polovina stabla stanja izvršena, tj. istražene su sve putanje, pa se pretraga dalje na isti način fokusira na levu plovinu stabla. Iako je u pitanju DFS algoritam koji jednu putanju izvršava do kraja pre nego što pređe na narednu, primećujemo da se sve vreme čuvaju i stanja koja su vezana za putanje koje se ne izučavaju u tom trenutku.
+
+\begin{figure}[ht]
+    \centering
     \includegraphics[width=0.6\linewidth]{BFS_stanja_1.png}
     \caption{Pregled izgleda niza stanja tokom izvršavanja BFS algoritma. Zelenom bojom su prikazana završna stanja, a strelice predstavljaju evoluciju stanja.}
     \label{fig:BFS_stanja}
 \end{figure}
 \bigbreak
-
-\subsection{DFS}
-Na slici \ref{fig:DFS_stanja} je prikazano na koji način se menja niz stanja izvršavanjem algoritma pretrage stabla stanja u dubinu. Stanja odgovaraju primeru \ref{lst:primer_KLEE}.  Sa slike vidimo da se na početku kreće iz stanja 1 koje evoluira u stanje 2 i dodaje se novo stanje 3 na kraj niza. Međutim, onda se bira baš stanje 3, kao poslednje u nizu kako bi se simulirala pretraga grafa u dubinu. Nakon toga, stanje 3 evoluira u stanje 6 i dodaje se novo stanje 7, dok stanje 2 ostaje i dalje u nizu ali na početku. Pretraga se nastavlja iz stanja 7 koje evoluira u stanje 14 i dodaje se stanje 15. Kako je sledeće stanje koje se izvršava broj 15, a ono je ujedno i završno stanje, samo se izbacuje iz niza i prelazi se na stanje 14. Ono je takođe završno pa se pretraga vraća na stanje 6, čime se zapravo izvršio povratak na prethodno grananje (kod stanja 3 na slici). Iz stanja 6 se dobijaju 2 završna stanja, koja nakon izvršavanja bivaju izbačena iz niza gde ostaje samo stanje 2. Primećujemo da je cela desna polovina stabla stanja izvršena, tj. istražene su sve putanje, pa se pretraga dalje na isti način fokusira na levu plovinu stabla. Iako je u pitanju DFS algoritam koji jednu putanju izvršava do kraja pre nego što pređe na narednu, primećujemo da se sve vreme čuvaju i stanja koja su vezana za putanje koje se ne izučavaju u tom trenutku.
-\begin{figure}[ht]
-    \centering
-    \includegraphics[height=1.09\linewidth]{DFS_states_1.png}
-    \caption{Pregled izgleda reda stanja tokom izvršavanja DFS algoritma. Zelenom bojom su prikazana završna stanja, a strelice predstavljaju evoluciju stanja.}
-    \label{fig:DFS_stanja}
-\end{figure}
 
 \subsection{BFS} 
 Zbog drugačije prirode algoritma i niz stanja se prilikom pretrage stabla stanja u širinu menja u drugačije u odnosnu na pretragu u dubinu. Ako pogledamo kako se na slici \ref{fig:BFS_stanja} menja red koji čuva stanja koja se izvršavaju vidimo da se kreće iz stanja 1. Zatim stanje 1 evoluira u stanje 2 i na kraj reda se dodaje stanje 3. Sledeće stanje koje se uzima je upravo 2, koje dalje evoluira u stanje 4. Takođe se dodaje novo stanje 5. Stanje 3 mora da ostane na početku reda kako bi bilo naredno izvršeno jer je u pitanju algoritam BFS i potrebno je prvo izvršiti sva stanja na jednom nivou stabla, pa tek onda preći na naredni. Od stanja 3 se dobijaju stanja 6 i 7 koji idu na kraj reda. Sledeće stanje koje se izvršava je 4, od koga nastaju 8 i 9. Postupak se nastavlja na prikazani način sve dok u redu ne ostanu samo završna stanja (8 - 15). U tom trenutku će se sva završna stanja izvršiti redom i biti izbacivana iz reda u redosledu izvršavanja. Pošto iz završnog stanja nema gde da se ode dalje, ono se samo izbacuje, time se putanja završava i prelazi se na naredno stanje  koje treba izvršiti.
@@ -678,36 +687,32 @@ BFS algoritam u ranoj fazi izvršavanj može otkriti neke anomalije u programu j
 
 Ideja BFS-DFS algoritma je da se prvo krene pretragom u širinu, čime bi se stablo stanja u velikoj meri ,,razgranalo'' i bio bi začet veliki broj različitih putanja. Kako se memorija ne bi prepunila (usled čega dolazi do odbacivanja velikog broja stanja), u nekom trenutku se prelazi na DFS pretragu čime bi putanje trebalo da se izučavaju do kraja. Prelazak sa algoritma pretrage u širinu, na pretragu u dubinu se vrši nakon što je popunjena određeni procenat memorije koja je dodeljena alatu KLEE. Procenat memorije nakon kog se prelazi na pretragu u dubinu se određuje parametrom, prilikom pokretanja alata. 
 
-U trenutku prelaska na DFS algoritam, stablo stanja je razgranato i započeto je izučavanje nekih putanja. Prelaskom na pretragu grafa u dubinu bi trebalo da se sve putanje izuče do kraja, jedna po jedna. Dakle, odabere se jedno stanje, i iz njega se pokreće pretraga u dubinu koja izučava putanju do samog kraja. Stanje iz kog se pokreće pretraga u dubinu je ono koje je najbliže nekoj instrukciji koja do tada nije bila izvršena. Opravdanje za ovakav pristup leži u činjenici da je i vreme ograničeno, tj. da se prilikom pokretanja KLEE-a zadaje vreme u kome izvršavanje mora biti završeno. U suprotnom se izvršavanje prekida usled prekoračenja vremena. Ukoliko se uvek pri pokretanju pretrage u dubinu iz nekog stanja, tj. za neku putanju, bira stanje na opisani način, veće su šanse da će biti otkrivena neka nova instrukcija i samim tim će se povećati pokrivenost koda. 
+U trenutku prelaska na DFS algoritam, stablo stanja je razgranato i započeto je izučavanje nekih putanja. Prelaskom na pretragu grafa u dubinu bi trebalo da se sve putanje izuče do kraja, jedna po jedna. Dakle, odabere se jedno stanje, i iz njega se pokreće pretraga u dubinu koja izučava putanju do samog kraja. Stanje iz kog se pokreće pretraga u dubinu je ono koje je najbliže nekoj naredbi koja do tada nije bila izvršena. Opravdanje za ovakav pristup leži u činjenici da je i vreme ograničeno, tj. da se prilikom pokretanja KLEE-a zadaje vreme u kome izvršavanje mora biti završeno. U suprotnom se izvršavanje prekida usled prekoračenja vremena. Ukoliko se uvek pri pokretanju pretrage u dubinu iz nekog stanja, tj. za neku putanju, bira stanje na opisani način, veće su šanse da će biti otkrivena neka nova naredba i samim tim će se povećati pokrivenost koda. 
 
 S\^am algoritam pretrage grafa u dubinu ima problem u simboličkom izvršavanju sa petljama i rekurzijom gde broj iteracija odnosno rekurzivnih poziva zavisi od simboličke promenljive. Iz tog razloga se u predloženom algoritmu ne izučavaju putanje do samog kraja, već postoji odbacivanje nekih stanja. Odbacivanje stanja u svakom od algoritama koji su implementirani u alatu KLEE je neminovnost. Postoji ogorman broj stanja, ograničena memorija i vreme izvršavanja pa neka stanja moraju biti žrtvovana kada se radi o realnom softveru. U predloženom algoritmu se stanja odbacuju u sledećem slučaju: \\
-Ako se izvršava pretraga grafa u dubinu za neku putanju, neka stanja se odbacuju kada se izvrši određen broj naredbi bez otkrivanja nove instrukcije (instrukcije koja ranije nije bila već izvršena). Stanja koja se odbacuju su ona u kojima nije bila otkrivena nova naredba.
-Ovo se radi po ugledu na odbacivanje stanja koje predlažu autori alata, koji takođe odbacuju stanja u kojima nije otkrivena nova instrukcija. Broj instrukcija nakon kojih se vrši odbacivanje stanja se reguliše parametrom prilikom pokretanja alata KLEE. Nakon što jedna putanja bude izvršena do kraja, ili sva stanja iz nje budu odbačena, bira se novo stanje, odnosno nova putanja za koju se ponovo pokreće pretraga grafa u dubinu.
+Ako se izvršava pretraga grafa u dubinu za neku putanju, neka stanja se odbacuju kada se izvrši određen broj naredbi bez otkrivanja nove naredbe (naredba koja ranije nije bila već izvršena). Stanja koja se odbacuju su ona u kojima nije bila otkrivena nova naredba.
+Ovo se radi po ugledu na odbacivanje stanja koje predlažu autori alata, koji takođe odbacuju stanja u kojima nije otkrivena nova naredba. Broj naredbi nakon kojih se vrši odbacivanje stanja se reguliše parametrom prilikom pokretanja alata KLEE. Nakon što jedna putanja bude izvršena do kraja, ili sva stanja iz nje budu odbačena, bira se novo stanje, odnosno nova putanja za koju se ponovo pokreće pretraga grafa u dubinu.
 
 U listingu \ref{lst:glavna} je prikazan pseudo k\^od glavne funkcije predloženog algoritma. Iz koda se vidi da se algoritam izvršava sve dok postoji barem jedno stanje koje može biti izvršeno. Prvi korak je odabrati naredno stanje koje se izvršava. Naredno stanje se bira u zavisnosti od algoritma koji se izvršava u tom trenutku. Postoje dve kolekcije podataka u kojima se čuvaju stanja. Red stanja za BFS, i niz stanja za DFS. Ukoliko se izvršava algoritam BFS, za naredno stanje se uzima stanje sa početka reda stanja. S druge strane, ako je algoritam koji se u datom trenutku izvršava DFS, uzima se poslednje stanje iz niza stanja. 
 
-U nekim situacijama se može desiti da je niz DFS stanja prazan. To je slučaj kad se tek prelazi na algoritam pretrage u dubinu, kada se neka putanja u potpunosti izuči do kraja, ili kada se sva stanja iz neke putanje izbace usled neotkrivanja nove instrukcije. U toj situaciji je potrebno u niz stanja ubaciti početno stanje, tj. ono od kog se kreće istraživanje putanje u dubinu. Stanje koje se uzima je ono koje je najbliže nekoj do tada neposećenoj instrukciji.
+    \begin{lstlisting}[caption={Pseudokod glavne funckije algoritma},captionpos=b,label={lst:glavna}]
+    function glavna_funkcija(pocetno_stanje):
+      aktivna_stanja.dodaj(pocetno_stanje)
+            
+      while aktivna_stanja.velicina() > 0:
+        stanje = odaberi_stanje()
+        nova_stanja, 
+          stanja_koja_treba_izbaciti = izvrsi_stanje(stanje)
+                
+        iskoriscenost_memorije(aktivna_stanja, nova_stanja,
+                               stanja_koja_treba_izbaciti)
+        azuriraj_stanja(nova_stanja, stanja_koja_treba_izbaciti)
+            
+    \end{lstlisting}
 
-Nakon što se odabere stanje koje će biti naredno izvršeno, ono se izvršava. Zavisno od instrukcije koja se nalazi u stanju može doći do evolucije stanja ukoliko nije bilo grananja ili može doći do evolucije stanja uz kreiranje novog stanja ukoliko je došlo do nekog grananja. Ukoliko nema grananja već samo evolucije stanja ono se smatra novim stanjem, odnosno dodaje se opet u skup aktivnih stanja tako evoluirano. Ovo se radi kako bi algoritmi koji su opisani u delu \ref{algoritmi} radili ispravno. Takođe, ukoliko je stanje bilo završno, može doći i do njegovog izbacivanja iz niza ili reda stanja jer završno stanje označava kraj putanje. Nakon što se neko stanje izvrši, vrši se ažuriranje skupa aktivnih stanja dodavanjem novonastalih ili brisanjem onih stanja koja su višak.
+U nekim situacijama se može desiti da je niz DFS stanja prazan. To je slučaj kad se tek prelazi na algoritam pretrage u dubinu, kada se neka putanja u potpunosti izuči do kraja, ili kada se sva stanja iz neke putanje izbace usled neotkrivanja nove naredbe. U toj situaciji je potrebno u niz stanja ubaciti početno stanje, tj. ono od kog se kreće istraživanje putanje u dubinu. Stanje koje se uzima je ono koje je najbliže nekoj do tada neposećenoj naredbi, što je prikazano u funkciji čiji je k\^od dat listingom \ref{lst:odaberi_stanje}.
 
-Ono što se dodatno radi u KLEE-u je da ako se memorija koja mu je dodeljena u potpunosti popuni, vrši se izbacivanje nekih stanja. Stanja koja se izbacuju se biraju slučajnom metodom, pri čemu se vodi računa da se ne izbacuju stanja u kojima je bila otkrivena nova instrukcija. U algoritmu BFS-DFS do ovakvog izbacivanja stanja retko dolazi. Razlog je taj što se nakon  što se popuni određeni procenat memorije BFS-om, prelazi na DFS. A pretraga u dubinu je algoritam koji jako malo memorije puni stanjima. Eksperimentalno je pokazano da ukoliko je zadati procenat manji od 80\%, nikada neće doći do izbacivanja stanja na ovaj način. Nakon izvršavanja svakog stanja, ažuriranja skupa aktivnih stanja, se vrši provera da li je potrebno promeniti algoritam. Algoritam se menja samo ako se izvršava pretraga u širinu i ako je procenat memorije koja je popunjena veći od $P\%$ ukupne memorije koja je dodeljena alatu KLEE za rad. Vrednost $P$ je vrednost koju korisnik zadaje prilikom pokretanja alata i uzima vrednosti iz intervala $[0, 1]$.
-
-Kada se ustanovi koja su nova stanja dodata i koja bi trebalo da budu izbačena potrebno je ažurirati red, odnosno niz stanja, zavisno od algoritma koji se u trenutku izvršava. Nevezano od algoritma, sva nova stanja se dodaju na kraj i sva stanja koja je potrebno izbaciti se izbacuju iz odgovarajuce kolekcije (reda, odnosno niza). Ukoliko je algoritam koji se u trenutku izvršava pretraga grafa u dubinu dodatno se vrši i provera koliko je izvršeno instrukcija od poslednje novootkrivene instrukcije. Svaki put kada se počne DFS pretraga za neku putanju, ili kada se otkrije neka nova instrukcija, pamti se broj do data izvršenih instrukcija. Prilikom svakog ažuriranja stanja u DFS nizu se proverava koliko je izvršeno instrukcija do tog trenutka. Ukoliko je izvršeno $X$ instrukcija od poslednje novootkrivene instrukcije ili od trenutka pokretanja pretrage u dubinu za datu putanju, izbacuju se sva stanja u kojima nije bila otkrivena nova instrukcija. $X$ je vrednost koja se zadaje kao argumemt prilikom pokretanja alata KLEE, i mora biti pozitivan ceo broj.
-
-\section{Pregled najvažnijih klasa alata KLEE}
-U ovom delu će biti opisano na koji način je implementiran alat KLEE, biće dat pregled najvažnijih klasa i metoda koje se koriste za simboličko izvršavanje u ovom alatu. Takođe će biti opisano na koji način je implementiran predloženi algoritam, koje su klase izmenjene, i na koji način.
-
-\subsection{Klasa \textit{Executor}}
-Glavna i najvažnija klasa koja se koristi u KLEE-u je klasa \textit{Executor}. U ovoj klasi postoji metod \textit{run}. Jedini argument koji prima je inicijalno stanje, tj. početno stanje od koga se kreće u pretragu, koren stabla stanja. Unutar ove metode se pre svega kreira pretraživač (eng. \textit{Searcher}). 
-Pretraživač je samo objekat klase koja zapravo vrši pretragu u stablu stanja. Jedna važna odlika ove klase je i vektor stanja koja se izvršavaju. U ovom vektoru se čuvaju sva aktivna stanja. Ukoliko tokom izvršavanja nekog stanja dođe do evolucije ili grananja, nova stanja se dodaju u skup aktivnih.
-
-Glavni deo ovog metoda je petlja u kojoj se vrši kompletno izvršavanje (listing \ref{lst:glavna}. Petlja se vrti sve dok postoji barem jedno aktivno stanje ili dok ne dođe do prekida iz nekog drugog razloga. Do prekida može na primer doći usled prekoračenja vremena koje je određeno za simboličko izvršavanje određenog koda. Unutar ove petlje se prvo uzima novo stanje iz pretraživača (zavisno od algoritma koji se koristi, to se radi na različite načine). Iz tog stanja se uzima trenutna instrukcija koja treba da bude izvršena, zatim se ona izvršava, nakon čega se vrši ažuriranje stanja u pretraživaču. Prilikom izvršavanja instrukcije može doći do nastajanja novog stanja usled grananja, ili evolucije stanja. 
-
-Još jedan važan korak u svakoj iteraciji petlje je provera memorije. Ovo se vrši svaki put kada se novo stanje izvrši. U metodu se proverava kolika je količina memorije popunjena u odnosu na maksimalnu količinu memorije koja je dodeljena KLEE-u. Ukoliko se popuni sva memorija, dolazi do izbacivanja nekih stanja iz niza aktivnih. Broj stanja koja se izbacuju je pseudo slučajan broj iz intervala $[0, N - 1]$, gde $N$ predstavlja broj \textit{aktivnih} stanja. Stanja koja će biti izbačena se takođe biraju slučajnom metodom, pri čemu se izbacuju samo stanja u kojima nije bila otkrivena nova instrukcija. Ovo je prikazano u listingu \ref{lst:popunjena_memorija}
-
-Prilikom izvršavanja svake od instrukcija se dodatno i menja logička formula koja se čuva u stanju. Logička formula u stanju odgovara uslovima koji važe za sve promenljive na nekoj putanji. Kada se dođe u neko stanje, putanja kroz k\^od je jedinstveno određena nizom stanja koja su prethodila tom stanju na putanji. Samim tim je i formula logike prvog reda jedinstveno određena za tu putanju, jer je ona nastala propagiranjem kroz niz stanja kojima se došlo u trenutno stanje. Ukoliko dolazi do evolucije stanja, formula se samo ažurira ukoliko ima potrebe za tim, a ako dođe do grananja, u stanju koje je evoluiralo dolazi do ažuriranja formule, dok se u novonastalom stanju kreira nova formula koja je nastala od formule iz prethodno izvršenog stanja i uslova grananja. za kreiranje logičke formule se koriste interno implementirane klase za konjukciju i disjkunkciju.   
-
-    \begin{lstlisting}[caption={Pseudokod funkcije za odabir narednog stanja koje se izvršava},captionpos=b,label={lst:odaberi_stanje}]
+\begin{lstlisting}[caption={Pseudokod funkcije za odabir narednog stanja koje se izvršava},captionpos=b,label={lst:odaberi_stanje}]
     function odaberi_stanje():
       if izvrsava_se_BFS:
         return BFS_stanja[0]
@@ -715,11 +720,60 @@ Prilikom izvršavanja svake od instrukcija se dodatno i menja logička formula k
         if DFS_stanja.velicina() > 0:
           return DFS_stanja[DFS_stanja.velicina() - 1]
         else:
-            stanje = najblize_neposecenoj_instrukciji(BFS_stanja)
+            stanje = najblize_neposecenoj_naredbi(BFS_stanja)
             DFS_stanja.dodaj_na_kraj(trazeno_stanje)
             return trazeno_stanje
     \end{lstlisting}
-    \newpage
+    
+Nakon što se odabere stanje koje će biti naredno izvršeno, ono se izvršava. Pseudo k\^od funkcije za izvršavanje stanja je prikazan u listingu \ref{lst:izvrsi_stanje}. Zavisno od naredbe koja se nalazi u stanju može doći do evolucije stanja ukoliko nije bilo grananja ili može doći do evolucije stanja uz kreiranje novog stanja ukoliko je došlo do nekog grananja. Ukoliko nema grananja već samo evolucije stanja ono se smatra novim stanjem, odnosno dodaje se opet u skup aktivnih stanja tako evoluirano. Ovo se radi kako bi algoritmi koji su opisani u delu \ref{algoritmi} radili ispravno. Takođe, ukoliko je stanje bilo završno, može doći i do njegovog izbacivanja iz niza ili reda stanja jer završno stanje označava kraj putanje. Nakon što se neko stanje izvrši, vrši se ažuriranje skupa aktivnih stanja dodavanjem novonastalih ili brisanjem onih stanja koja su višak.
+
+    \begin{lstlisting}[caption={Pseudokod funkcije koja izvrsava stanje},captionpos=b,label={lst:izvrsi_stanje}]
+    function izvrsi_stanje(stanje):
+      izvrsi(stanje.trenutna_naredba)
+      
+      nova_stanja, stanja_koja_treba_izbaciti
+      
+      if stanje.jeste_grananje():
+        evoulirano_stanje, novo_stanje = izvrsi_grananje(stanje)
+        nova_stanja.dodaj(evoulirano_stanje)
+        nova_stanja.dodaj(novo_stanje)
+      
+      if stanje.zavrsno:
+        stanja_koja_treba_izbaciti.dodaj(stanje)
+        
+      return {nova_stanja, stanja_koja_treba_izbaciti}
+    \end{lstlisting}
+    
+Ono što se dodatno radi u KLEE-u je da ako se memorija koja mu je dodeljena u potpunosti popuni, vrši se izbacivanje nekih stanja. Stanja koja se izbacuju se biraju slučajnom metodom, pri čemu se vodi računa da se ne izbacuju stanja u kojima je bila otkrivena nova naredba. U algoritmu BFS-DFS do ovakvog izbacivanja stanja retko dolazi. Razlog je taj što se nakon  što se popuni određeni procenat memorije BFS-om, prelazi na DFS. A pretraga u dubinu je algoritam koji jako malo memorije puni stanjima. Eksperimentalno je pokazano da ukoliko je zadati procenat manji od 80\%, nikada neće doći do izbacivanja stanja na ovaj način. Nakon izvršavanja svakog stanja, ažuriranja skupa aktivnih stanja, se vrši provera da li je potrebno promeniti algoritam. Algoritam se menja samo ako se izvršava pretraga u širinu i ako je procenat memorije koja je popunjena veći od $P\%$ ukupne memorije koja je dodeljena alatu KLEE za rad. Vrednost $P$ je vrednost koju korisnik zadaje prilikom pokretanja alata i uzima vrednosti iz intervala $[0, 1]$. Pseudo k\^od funkcije koja vrši proveru popunjenosti memorije koja je dodeljena KLEE-u za rad je prikazan u lisitngu \ref{lst:popunjena_memorija}.
+
+\begin{lstlisting}[caption={Pseudokod funkcije koja proverava koliko je memorije popunjeno},captionpos=b,label={lst:popunjena_memorija}]
+    function regulisi_iskoriscenost_memorije(aktivna_stanja, 
+                                             nova_stanja,
+                                    stanja_koja_treba_izbaciti):
+      if popunjena_memorija >= memorija_dodeljena_alatu:
+        X = slucajan_broj(0, aktivna_stanja.velicina())
+
+        while X > 0:
+          Y = slucajan_broj(0, aktivna_stanja.velicina())
+          stanje = aktivna_stanja[Y]
+          
+          if stanje.otkrivena_nova_naredba:
+            Y = slucajan_broj(0, aktivna_stanja.velicina())
+            stanje = aktivna_stanja[Y]
+
+          aktivna_stanja.ukloni(stanje)
+          stanja_koja_treba_izbaciti.dodaj(stanje)
+          
+          if stanje in nova_stanja:
+            nova_stanja.ukloni(stanje)
+          X--
+          
+      if izvrsava_se_BFS i popunjena_memorija > zadate_granice:
+        promeni_algoritam_na_DFS()
+    \end{lstlisting}
+
+Kada se ustanovi koja su nova stanja dodata i koja bi trebalo da budu izbačena potrebno je ažurirati red, odnosno niz stanja, zavisno od algoritma koji se u trenutku izvršava. Nevezano od algoritma, sva nova stanja se dodaju na kraj i sva stanja koja je potrebno izbaciti se izbacuju iz odgovarajuce kolekcije (reda, odnosno niza). Ukoliko je algoritam koji se u trenutku izvršava pretraga grafa u dubinu dodatno se vrši i provera koliko je izvršeno naredbi od poslednje novootkrivene naredbe. Svaki put kada se počne DFS pretraga za neku putanju, ili kada se otkrije neka nova naredba, pamti se broj do data izvršenih naredbi. Prilikom svakog ažuriranja stanja u DFS nizu se proverava koliko je izvršeno naredbi do tog trenutka. Ukoliko je izvršeno $X$ naredbi od poslednje novootkrivene naredbe ili od trenutka pokretanja pretrage u dubinu za datu putanju, izbacuju se sva stanja u kojima nije bila otkrivena nova naredba. $X$ je vrednost koja se zadaje kao argumemt prilikom pokretanja alata KLEE, i mora biti pozitivan ceo broj. Pseudo kodovi funkcija za ažuriranje stanja su zadati listinzima \ref{lst:azuriraj_stanja}, \ref{lst:azuriraj_BFS} i \ref{lst:azuriraj_DFS}.
+
     \begin{lstlisting}[caption={Pseudokod funkcije za azuriranje stanja},captionpos=b,label={lst:azuriraj_stanja}]
     function azuriraj_stanja(skup_novih_stanja, 
                              skup_stanja_koja_treba_izbaciti):
@@ -744,87 +798,42 @@ Prilikom izvršavanja svake od instrukcija se dodatno i menja logička formula k
       DFS_stanja.dodaj_na_kraj(skup_novih_stanja)
       DFS_stanja.ukloni(skup_stanja_koja_treba_izbaciti)        
             
-      if broj_izvrsenih_stanja_bez_otrkivanja_nove_instrukcije > 
+      if broj_izvrsenih_stanja_bez_otrkivanja_nove_naredbe > 
          unapred_zadata_granica:
            for stanje u DFS_stanja:
-             if !stanje.otkrivena_nova_instrukcija:
+             if !stanje.otkrivena_nova_naredba:
                 DFS_stanja.ukloni(stanje)
     \end{lstlisting}
+\section{Pregled najvažnijih klasa alata KLEE}
+U ovom delu će biti opisano na koji način je implementiran alat KLEE, biće dat pregled najvažnijih klasa i metoda koje se koriste za simboličko izvršavanje u ovom alatu. Takođe će biti opisano na koji način je implementiran predloženi algoritam, koje su klase izmenjene, i na koji način.
+
+\subsection{Klasa \textit{Executor}}
+Glavna i najvažnija klasa koja se koristi u KLEE-u je klasa \textit{Executor}. U ovoj klasi postoji metod \textit{run}. Jedini argument koji prima je inicijalno stanje, tj. početno stanje od koga se kreće u pretragu, koren stabla stanja. Unutar ove metode se pre svega kreira pretraživač (eng. \textit{Searcher}). 
+Pretraživač je samo objekat klase koja zapravo vrši pretragu u stablu stanja. Jedna važna odlika ove klase je i vektor stanja koja se izvršavaju. U ovom vektoru se čuvaju sva aktivna stanja. Ukoliko tokom izvršavanja nekog stanja dođe do evolucije ili grananja, nova stanja se dodaju u skup aktivnih.
+
+Glavni deo ovog metoda je petlja u kojoj se vrši kompletno izvršavanje (listing \ref{lst:glavna}. Petlja se vrti sve dok postoji barem jedno aktivno stanje ili dok ne dođe do prekida iz nekog drugog razloga. Do prekida može na primer doći usled prekoračenja vremena koje je određeno za simboličko izvršavanje određenog koda. Unutar ove petlje se prvo uzima novo stanje iz pretraživača (zavisno od algoritma koji se koristi, to se radi na različite načine). Iz tog stanja se uzima trenutna naredba koja treba da bude izvršena, zatim se ona izvršava, nakon čega se vrši ažuriranje stanja u pretraživaču. Prilikom izvršavanja naredbe može doći do nastajanja novog stanja usled grananja, ili evolucije stanja. 
+
+Još jedan važan korak u svakoj iteraciji petlje je provera memorije. Ovo se vrši svaki put kada se novo stanje izvrši. U metodu se proverava kolika je količina memorije popunjena u odnosu na maksimalnu količinu memorije koja je dodeljena KLEE-u. Ukoliko se popuni sva memorija, dolazi do izbacivanja nekih stanja iz niza aktivnih. Broj stanja koja se izbacuju je pseudo slučajan broj iz intervala $[0, N - 1]$, gde $N$ predstavlja broj \textit{aktivnih} stanja. Stanja koja će biti izbačena se takođe biraju slučajnom metodom, pri čemu se izbacuju samo stanja u kojima nije bila otkrivena nova naredba. Ovo je prikazano u listingu \ref{lst:popunjena_memorija}
+
+Prilikom izvršavanja svake od naredbi se dodatno i menja logička formula koja se čuva u stanju. Logička formula u stanju odgovara uslovima koji važe za sve promenljive na nekoj putanji. Kada se dođe u neko stanje, putanja kroz k\^od je jedinstveno određena nizom stanja koja su prethodila tom stanju na putanji. Samim tim je i formula logike prvog reda jedinstveno određena za tu putanju, jer je ona nastala propagiranjem kroz niz stanja kojima se došlo u trenutno stanje. Ukoliko dolazi do evolucije stanja, formula se samo ažurira ukoliko ima potrebe za tim, a ako dođe do grananja, u stanju koje je evoluiralo dolazi do ažuriranja formule, dok se u novonastalom stanju kreira nova formula koja je nastala od formule iz prethodno izvršenog stanja i uslova grananja. za kreiranje logičke formule se koriste interno implementirane klase za konjukciju i disjkunkciju.   
     
-    \begin{lstlisting}[caption={Pseudokod funkcije koja proverava koliko je memorije popunjeno},captionpos=b,label={lst:popunjena_memorija}]
-    function iskoriscenost_memorije(aktivna_stanja, nova_stanja,
-                                    stanja_koja_treba_izbaciti):
-      if popunjena_memorija >= memorija_dodeljena_alatu:
-        X = slucajan_broj(0, aktivna_stanja.velicina())
-
-        while X > 0:
-          Y = slucajan_broj(0, aktivna_stanja.velicina())
-          stanje = aktivna_stanja[Y]
-          
-          if stanje.otkrivena_nova_instrukcija:
-            Y = slucajan_broj(0, aktivna_stanja.velicina())
-            stanje = aktivna_stanja[Y]
-
-          aktivna_stanja.ukloni(stanje)
-          stanja_koja_treba_izbaciti.dodaj(stanje)
-          
-          if stanje in nova_stanja:
-            nova_stanja.ukloni(stanje)
-          X--
-          
-      if izvrsava_se_BFS i popunjena_memorija > zadate_granice:
-        promeni_algoritam_na_DFS()
-    \end{lstlisting}
-
-    \begin{lstlisting}[caption={Pseudokod funkcije koja izvrsava stanje},captionpos=b,label={lst:izvrsi_stanje}]
-    function izvrsi_stanje(stanje):
-      izvrsi(stanje.trenutna_instrukcija)
-      
-      nova_stanja, stanja_koja_treba_izbaciti
-      
-      if stanje.desilo se grananje:
-        evoulirano_stanje, novo_stanje = izvrsi_grananje(stanje)
-        nova_stanja.dodaj(evoulirano_stanje)
-        nova_stanja.dodaj(novo_stanje)
-      
-      if stanje.zavrsno:
-        stanja_koja_treba_izbaciti.dodaj(stanje)
-        
-      return {nova_stanja, stanja_koja_treba_izbaciti}
-    \end{lstlisting}
-    
-    \begin{lstlisting}[caption={Pseudokod glavne funckije algoritma},captionpos=b,label={lst:glavna}]
-    function glavna_funkcija(pocetno_stanje):
-      aktivna_stanja.dodaj(pocetno_stanje)
-            
-      while aktivna_stanja.velicina() > 0:
-        stanje = odaberi_stanje()
-        nova_stanja, 
-          stanja_koja_treba_izbaciti = izvrsi_stanje(stanje)
-                
-        iskoriscenost_memorije(aktivna_stanja, nova_stanja,
-                               stanja_koja_treba_izbaciti)
-        azuriraj_stanja(nova_stanja, stanja_koja_treba_izbaciti)
-            
-    \end{lstlisting}
-
 \subsection{Klasa \textit{ExecutionState}}
-U nastavku će biti dat kratak pregled klase \textit{ExecutionState}, koja predstavlja jedno stanje koje se izvršava. U ovoj klasi je najvažniji metod onaj u kojem se vrši grananje, tj. u kojem se prilikom grananja formira novo stanje. S druge strane, kako jedna instanca ove klase predstavlja stanje, u njoj postoji veći broj veoma zanimljivih atributa. Neki od njih su:
+U nastavku će biti dat kratak pregled klase \textit{ExecutionState}, koja predstavlja jedno stanje koje se izvršava. U ovoj klasi je najvažniji metod \textit{branch}, koji vrši grananje, tj. u kojem se prilikom grananja formira novo stanje. S druge strane, kako jedna instanca ove klase predstavlja stanje, u njoj postoji veći broj veoma zanimljivih atributa. Neki od njih su:
 
 \begin{description}
-    \item \textbf{\textit{pc}} - predstavlja narednu instrukciju koja treba da bude izvršena.
+    \item \textbf{\textit{pc}} - predstavlja narednu naredbu koja treba da bude izvršena.
     
-    \item \textbf{\textit{prevPC}} - trenutna instrukcija koja se izvršava u stanju.
+    \item \textbf{\textit{prevPC}} - trenutna naredba koja se izvršava u stanju.
     
-    \item \textbf{\textit{addressSpace}} - adresni prostor gde se smeštaju lokalne promenljive, pokazivači, nizovi koji su vezani za stanje. O radu sa memorijom u okviru alata KLEE je bilo vise recu u delu \ref{memorija}.
+    \item \textbf{\textit{addressSpace}} - adresni prostor gde se smeštaju lokalne promenljive, pokazivači, nizovi koji su vezani za stanje.
     
     \item \textbf{\textit{constraints}} - ograničenja koja važe u stanju. Na osnovu njih se formira formula logike prvog reda, za koju se poziva SMT rešavač.
     
-    \item \textbf{\textit{instsSinceCovNew}} - predstavlja broj instrukcija koje su izvršene od poslednje novootkrivene instrukcije.
+    \item \textbf{\textit{instsSinceCovNew}} - predstavlja broj naredbi koje su izvršene od poslednje novootkrivene naredbe.
     
-    \item \textbf{\textit{coveredNew}} - govori o tome da li je u stanju otkrivena nova instrukcija. Ovaj atribut je veoma važan jer se na osnovu njega određuje koja stanja mogu biti izbačena iz skupa aktivnih kada dolazi do odbacivanja nekih stanja.
+    \item \textbf{\textit{coveredNew}} - govori o tome da li je u stanju otkrivena nova naredba. Ovaj atribut je veoma važan jer se na osnovu njega određuje koja stanja mogu biti izbačena iz skupa aktivnih kada dolazi do odbacivanja nekih stanja.
     
-    \item \textbf{\textit{coveredLines}} - brojevi linija koje su pokrivene ovim stanjem i fajlovi u kojima se te linije nalaze. Na osnovu ovoga se može videti prilikom izvršavanja instrukcije gde se ona nalazi u kodu.
+    \item \textbf{\textit{coveredLines}} - brojevi linija koje su pokrivene ovim stanjem i fajlovi u kojima se te linije nalaze. Na osnovu ovoga se može videti prilikom izvršavanja naredbe gde se ona nalazi u kodu.
     
     \item \textbf{\textit{symbolics}} - lista simboličkih promenljivih koje postoje u stanju. Zapravo predstavlja listu svih simboličkih promenljivih koje se nalaze na putu od korena stabla izvršavanja do čvora u kome se stanje nalazi.
 \end{description}
@@ -846,13 +855,37 @@ Kako bi mogao da bude implementiran novi algoritam u alatu KLEE, potrebno je i n
 
 Atributi nove klase su dva vektora pokazivača na stanja. Jedan vektor služi za čuvanje stanja prilikom korišćenja algoritma pretrage grafa u dubinu, dok drugi služi kao dek, i njegova stanja se koriste kada je aktivan algoritam pretrage grafa u širinu. Dodatno postoji promenljiva koja govori o tome da li se izvršava BFS ili DFS algoritam. Postoji promenljiva koja definiše nakon koliko procenata popunjene memorije se prelazi na algoritam pretrage u dubinu. Takođe se čuva i referenca na objekat klase \textit{Executor}. Uloga ovog atributa je opisana u \ref{userSearcher}.
 
-Pored metoda koje su nasleđene iz nastklase \textit{Searcher} u ovoj klasi postoje i neke dodatne metode koje su potrebne. Kako postoje dva algoritma koja se izvršavaju u ovom pretraživaču postoje posebne metode za ažuriranje odgovarjućih kolekcija stanja. Kada se pozove predefinisani metod za ažuriranje stanja, zavisno od algoritma koji se izvršava, poziva se odgovarajući metod za ažuriranje odgovarajuće kolekcije podataka. Takođe postoji metod koji pronalazi stanje u deku BFS stanja koje je najbliže nekoj neposećenoj isntrukciji. Ovaj metod se koristi prilikom prelaska sa algoritma pretrage grafa u širinu na algoritam pretrage u dubinu, odnosno kad se kreće u izučavanje neke putanje u dubinu. Kako bi se otkrilo koja putanja garantuje da će se najpre naći neka nova instrukcija koristi se ovaj metod. Još dva važna metoda su metod koji vrši promenu sa BFS-a na DFS, i metod koji vraća informaciju o tome da li se trenutno izvršava algoritam pretrage u dubinu. Ukoliko poslednje pomenuti metod vrati vrednost netačno (eng. \textit{false}), to znači da se trenutno izvršava pretraga u dubinu.
+Pored metoda koje su nasleđene iz nastklase \textit{Searcher} u ovoj klasi postoje i neke dodatne metode koje su potrebne. Kako postoje dva algoritma koja se izvršavaju u ovom pretraživaču postoje posebne metode za ažuriranje odgovarjućih kolekcija stanja. Kada se pozove predefinisani metod za ažuriranje stanja, zavisno od algoritma koji se izvršava, poziva se odgovarajući metod za ažuriranje odgovarajuće kolekcije podataka. Takođe postoji metod koji pronalazi stanje u deku BFS stanja koje je najbliže nekoj neposećenoj naredbi. Ovaj metod se koristi prilikom prelaska sa algoritma pretrage grafa u širinu na algoritam pretrage u dubinu, odnosno kad se kreće u izučavanje neke putanje u dubinu. Kako bi se otkrilo koja putanja garantuje da će se najpre naći neka nova naredba koristi se ovaj metod. Još dva važna metoda su metod koji vrši promenu sa BFS-a na DFS, i metod koji vraća informaciju o tome da li se trenutno izvršava algoritam pretrage u dubinu. Ukoliko poslednje pomenuti metod vrati vrednost netačno (eng. \textit{false}), to znači da se trenutno izvršava pretraga u dubinu.
 
-Kako bi predloženi algoritam mogao da se koristi u okviru alata KLEE, prilikom njegovog pokretanja je potrebno specifikovati da se radi o BFS-DFS pretrazi stabla stanja. Takođe je neophodno dodati i parametre koji određuju nakon koliko procenata popunjenosti dodeljene memorije dolazi do promene algoritma i broj izvršenih instrukcija od poslednje otkrivene instrukcije nakon kog dolazi do odbacivanja nekih stanja u algoritmu pretrage u dubinu. Parametar kojim se određuje procenat zauzeća memorije se zove \texttt{memory-part}, dok se parametar koji govori o broju instrukcija nakon kojih se stanja izbacuju zove \texttt{insts-since-covered-new}. 
+\section{Unapređenje postojećih klasa alata KLEE} \label{izmene}
+Prilikom dodavanja novog algoritma za pretragu stabla stanja je bilo neophodno izmeniti neke klase u okviru implementacije alata KLEE. U ovom delu će za svaku klasu koja je promenjena biti opisane promene.
 
-Primer pokretanja alata KLEE sa dodatnim parametrima je:
+\begin{description}
+    \item \textbf{\textit{Executor}} - u klasi \textit{Executor} je bilo neophodno dodati novi metod za brisanje aktivnih stanja. Metod koji postoji izbacuje neka stanja iz skupa aktivnih ukoliko dođe do prevelikog zauzeća memorije. Međutim, kako predloženi algoritam izbacuje stanja prilikom rada DFS algoritma, neophodno je izbaciti i ta stanja iz skupa aktivnih. Takođe, iz ove klase se pozivao metod za prelazak sa algoritma pretrage u širinu na algoritam pretrage u dubinu. U klasi \textit{Executor} je implementiran metod koji proverava koliko je memorije zauzeto. U ovom metodu je dodata i provera da li je procenat zauzete memorije veći ili jednak procentu memorije nakon čijeg punjenja se menja algoritam.
+    
+    \item \textbf{\textit{Searcher}} - u ovoj klasi je u enumeracionom tipu podataka dodat predloženi pretraživač. Enumeracioni tip čuva informaciju o tome koji su mogući pretraživači, a kako je dodat nov, bilo je neophodno dodati i njega u ovu listu.
+    
+    \item \textbf{\textit{UserSearcher}} \label{userSearcher} - u klasi \textit{UserSearcher} se vrši instanciranje novog pretraživača. Ova klasa je izmenjna tako što metod koji instancira pretraživač pored tipa pretraživača dobija i referencu na instancu klase \textit{Executor}. Ovo je urađeno jer je predloženom algoritmu neophodna ova referenca, zbog toga što algoritam poziva metod za izbacivanje nekih DFS stanja iz skupa aktivnih. Ovo je moglo biti urađeno tako što bi metod za izbacivanje stanja bio statički. Međutim, kako skup stanja nije statički atribut, odabrano je opisano rešenje. 
+    
+    U ovoj klasi je moguće definisati i dodatne parametre koji se prosleđuju alatu. Parametri kao što su algoritam koji se koristi u pretrazi, maksimalno dozvoljeno vreme izvršavanja, memorija koja je dodeljena KLEE-u i slično. Za potrebe predloženog algoritma, klasa je obogaćena sa dva parametra. Jedan čuva procenat memorije koji nakon što se popuni prelazi se na DFS (broj u pokretnom zarezu dvostruke tačnosti). Drugi je broj naredbi nakon kojih se izbacuju stanja iz DFS niza stanja ukoliko nije bilo otkrivanja nove naredbe (celobrojna vrednost).
+\end{description}
 
-\noindent\texttt{klee --write-cvcs --write-cov --max-memory=1000 external-calls=all \\ --only-output-states-covering-new --max-sym-array-size=4096 --max-time=720min --search=bfs-dfs memory-part=0.4 insts-since-covered-new=10000 mkdir.bc --sym-args 0 1 10 --sym-args 0 2 2 --sym-files 1 8 --sym-stdin 8 --sym-stdout}
+Nijedna od navedenih izmena ne menja ponašanje alata KLEE. On se i dalje može koristiti na potpuno isti način kao i pre nego što je implementacija izmenjena dodavanjem novog algoritma.
+
+\section{Upotreba algoritma BFS-DFS}
+
+Kako bi predloženi algoritam mogao da se koristi u okviru alata KLEE, prilikom njegovog pokretanja je potrebno specifikovati da se radi o BFS-DFS pretrazi stabla stanja. Takođe je neophodno dodati i parametre koji određuju nakon koliko procenata popunjenosti dodeljene memorije dolazi do promene algoritma i broj izvršenih naredbi od poslednje otkrivene naredbe nakon kog dolazi do odbacivanja nekih stanja u algoritmu pretrage u dubinu. Parametar kojim se određuje procenat zauzeća memorije se zove \texttt{memory-part}, dok se parametar koji govori o broju naredbi nakon kojih se stanja izbacuju zove \texttt{insts-since-covered-new}. 
+
+Primer pokretanja alata KLEE sa dodatnim parametrima je prikazano u listingu \ref{lst:pokretanje_klee_moj}.
+
+\begin{lstlisting}[caption={Primer pokretanja alata KLEE gde se za pretragu stabla stanja koristi algoritam BFS-DFS.}, label={lst:pokretanje_klee_moj}, captionpos=b]
+klee --write-cvcs --write-cov --max-memory=1000 external-calls=all
+--only-output-states-covering-new --max-sym-array-size=4096 
+--max-time=720min --search=bfs-dfs memory-part=0.4 
+insts-since-covered-new=10000 mkdir.bc --sym-args 0 1 10 --sym-args 
+0 2 2 --sym-files 1 8 --sym-stdin 8 --sym-stdout
+
+\end{lstlisting}
 
 Izlaz koji kreira alat, koji je već opisan u \ref{instalacija}, je potpuno isti kao i pre dodavanja novog algoritma. Primer izlaza alata za program \textit{mkdir} je prikazan na slici \ref{fig:my_mkdir}.
 
@@ -863,23 +896,8 @@ Izlaz koji kreira alat, koji je već opisan u \ref{instalacija}, je potpuno isti
     \label{fig:my_mkdir}
 \end{figure}
 
-\section{Izmene u postojećim klasama alata KLEE} \label{izmene}
-Prilikom dodavanja novog algoritma za pretragu stabla stanja je bilo neophodno izmeniti neke klase u okviru implementacije alata KLEE. U ovom delu će za svaku klasu koja je promenjena biti opisane promene.
-
-\begin{description}
-    \item \textbf{\textit{Executor}} - u klasi \textit{Executor} je bilo neophodno dodati novi metod za brisanje aktivnih stanja. Metod koji postoji izbacuje neka stanja iz skupa aktivnih ukoliko dođe do prevelikog zauzeća memorije. Međutim, kako predloženi algoritam izbacuje stanja prilikom rada DFS algoritma, neophodno je izbaciti i ta stanja iz skupa aktivnih. Takođe, iz ove klase se pozivao metod za prelazak sa algoritma pretrage u širinu na algoritam pretrage u dubinu. U klasi \textit{Executor} je implementiran metod koji proverava koliko je memorije zauzeto. U ovom metodu je dodata i provera da li je procenat zauzete memorije veći ili jednak procentu memorije nakon čijeg punjenja se menja algoritam.
-    
-    \item \textbf{\textit{Searcher}} - u ovoj klasi je u enumeracionom tipu podataka dodat predloženi pretraživač. Enumeracioni tip čuva informaciju o tome koji su mogući pretraživači, a kako je dodat nov, bilo je neophodno dodati i njega u ovu listu.
-    
-    \item \textbf{\textit{UserSearcher}} \label{userSearcher} - u klasi \textit{UserSearcher} se vrši instanciranje novog pretraživača. Ova klasa je izmenjna tako što metod koji instancira pretraživač pored tipa pretraživača dobija i referencu na instancu klase \textit{Executor}. Ovo je urađeno jer je predloženom algoritmu neophodna ova referenca. Razlog je taj što algoritam poziva metod za izbacivanje nekih DFS stanja iz skupa aktivnih. Ovo je moglo biti urađeno tako što će metod za izbacivanje stanja biti statički. Međutim, kako skup stanja nije statički atribut, odabrano je opisano rešenje. 
-    
-    U ovoj klasi je moguće definisati i dodatne parametre koji se prosleđuju alatu. Parametri kao što su algoritam koji se koristi u pretrazi, maksimalno dozvoljeno vreme izvršavanja, memorija koja je dodeljena KLEE-u i slično. Za potrebe predloženog algoritma, klasa je obogaćena sa dva parametra. Jedan čuva procenat memorije koji nakon što se popuni prelazi se na DFS (broj u pokretnom zarezu dvostruke tačnosti). Drugi je broj instrukcija nakon kojih se izbacuju stanja iz DFS niza stanja ukoliko nije bilo otkrivanja nove instrukcije (celobrojna vrednost).
-\end{description}
-
-Nijedna od navedenih izmena ne menja ponašanje alata KLEE. On se i dalje može koristiti na potpuno isti način kao i pre nego što je implementacija izmenjena dodavanjem novog algoritma.
-
 \section{Eksperimentalna evaluacija}
-Poređenje predloženog algoritma i algoritma koji preporučuju autori alata je vršeno na odabranom korpusu programa iz GNU Coreutils-a. 
+Poređenje predloženog algoritma i algoritma koji preporučuju autori alata je vršeno na odabranom korpusu programa iz GNU Coreutils-a. Predlog autora KLEE-a \cite{klee} je algoritam slučajne pretrage koji koristi heuristiku otkrivanja najbliže neposećene naredbe. 
 
 \subsection{GNU Coreutils}
 GNU Coreutils predstavlja skup alata za rad sa fajlovima, manipulaciju tekstom, komande komandne linije. Svi alati i komande su implementirane u programskom jeziku C \cite{coreutils}. Neke od komandi koje su implementirane su 
@@ -898,42 +916,43 @@ GNU Coreutils predstavlja skup alata za rad sa fajlovima, manipulaciju tekstom, 
     \item \textit{pwd} - komanda kojom se ispisuje apsolutna putanja do trenutnog direktorijuma
 \end{enumerate} 
 
-Rezultati sprovednog istraživanja i poređenja poredloženog algoritma sa algoritmom koji su predložili autori rada su pokazali da je opisanim pristupom, gde se kombinuju pretraga grafa u širinu (da bi se stablo što brže razgranalo) i pretraga grafa u dubinu (kako bi se putanje izučile što dublje je moguće), može uštedeti na vremenu pri čemu se ne gubi previše na pokrivenosti koda. Na slikama \ref{fig:poredjenje_vemena_1} i \ref{fig:poredjenje_vemena_2} se vide rezultati poređenja vremena predloženih algoritama. Na slici \ref{fig:poredjenje_instrukcija} se mogu videti rezultati poređenja pokrivenosti instrukcija (u procentima), dok slika \ref{fig:poredjenje_grana} prikazuje rezultate poređenja pokrivenosti grana (u procentima). Predlog autora alata KLEE \cite{klee} je algoritam slučajne pretrage koji koristi heuristiku otkrivanja najbliže neposećene instrukcije. 
-
-Na osnovu predloga autora \cite{klee}, alatu je dato 1000 megabajta memorije za izvršavanje. Maksimalno vreme izvršavanja je 12 sati. Na osnovu rezultata se može videti da je u najvećem broju slučajeva algoritam BFS-DFS brži od slučajne pretrage sa heuristikom, negde i nekoliko puta. Takođe, u dva slučaja algoritam slučajne pretrage nije uspeo da se završi u predviđenom vremenu. Kod algoritma preloženog u ovom radu se to nijednom nije desilo. 
-
-Što se pokrivenosti koda tiče, u najvećem broju slučajeva je algoritam koji predlažu autori alata bolji (najviše za 7.48\%), ali postoje i slučajevi gde je algoritam BFS-DFS dao veću porivenost koda (naredbe \textit{echo}, \textit{false}, \textit{kill}, \textit{nice}, \textit{pwd} i \textit{true}).
-
 \subsection{Izbor parametara}
+Na osnovu predloga autora \cite{klee}, alatu je dato 1000 megabajta memorije za izvršavanje. Maksimalno vreme izvršavanja je 12 sati. Svi eksperimenti su izvršavani na računaru sa procesorom Intel(R) Core(TM) i7-8550U od 1.80GHz, sa 8GB RAM memorije i sa operativnim sistemom LinuxMint 19.
 
-Eksperimantalnim putem je pokazano da su najbolji parametri za pokretanje algoritma BFS-DFS 40\% za memoriju nakon čije popunjenosti se prelazi na pretragu u dubinu i 10000 za broj instrukcija nakon kojih se vrši izbacivanje DFS stanja ukoliko nije bilo otkrivanja nove instrukcije. Ukoliko se procenat zauzeća memorije poveća na preko 80\% dolazi do izbacivanja stanja usled potpunog zauzeća memorije. Eksperimetni su vršeni sa 85\%, 80\%, 67\%, 60\%, 40\% i 20\%. Menjanjem vrednosti ovog parametra se pokazalo da pokrivenost koda opada. Vrednosti koje su testirane za broj instrukcija su 5000, 7000, 10000 i 15000. Vrednosti manje od 10000 su dovodile od manje pokrivenosti koda, dok je veća vrednost popravljala pokrivenost neznatno uz značajno veći utrošak vremena.
+Eksperimantalnim putem je pokazano da su najbolji parametri za pokretanje algoritma BFS-DFS 40\% za memoriju nakon čije popunjenosti se prelazi na pretragu u dubinu i 10000 za broj naredbi nakon kojih se vrši izbacivanje DFS stanja ukoliko nije bilo otkrivanja nove naredbe. Ukoliko se procenat zauzeća memorije poveća na preko 80\% dolazi do izbacivanja stanja usled potpunog zauzeća memorije. Eksperimetni su vršeni sa 85\%, 80\%, 67\%, 60\%, 40\% i 20\%. Menjanjem vrednosti ovog parametra se pokazalo da pokrivenost koda opada. Vrednosti koje su testirane za broj naredbi su 5000, 7000, 10000 i 15000. Vrednosti manje od 10000 su dovodile od manje pokrivenosti koda, dok je veća vrednost popravljala pokrivenost neznatno uz značajno veći utrošak vremena.
 
 Eksperimentalno je pokazano da uz ovakav izbor parametara na odabranom korpusu programa nikada ne dolazi do popunjavanja memorije u potpunosti, odnosno da se stanja izbacuju iz skupa aktivnih samo DFS algoritmom na opisani način.
 
-Pored opisanog pristupa, bilo je pokušaja neznatne modifikacije algoritma. Pokušaj je bio da se stanja ne izbacuju nakon određenog broja izvršenih instrukcija pri čemu nije bilo otkrivanja nove, već da se izbacivanje vrši nakon određenog vremena, ukoliko nije bila otkrivena nova instrukcija. Još jedna ideja je bila da se nakon određene dubine u putanji ukoliko nije bilo otkrivanja nove instrukcije vrši izbacivanje stanja. Nijedan od ova dva pristupa nije doneo unapređenja algoritmu.
+Pored opisanog pristupa, bilo je pokušaja neznatne modifikacije algoritma. Pokušaj je bio da se stanja ne izbacuju nakon određenog broja izvršenih naredbi pri čemu nije bilo otkrivanja nove, već da se izbacivanje vrši nakon određenog vremena, ukoliko nije bila otkrivena nova naredba. Još jedna ideja je bila da se nakon određene dubine u putanji ukoliko nije bilo otkrivanja nove naredbe vrši izbacivanje stanja. Nijedan od ova dva pristupa nije doneo unapređenja algoritmu.
 
-\begin{figure}[ht]
+\subsection{Rezultati evaluacije}
+
+Na slikama \ref{fig:poredjenje_vemena_1} i \ref{fig:poredjenje_vemena_2} se vide rezultati poređenja vremena predloženih algoritama. Na osnovu rezultata se može videti da je u najvećem broju slučajeva algoritam BFS-DFS brži od slučajne pretrage sa heuristikom, negde i nekoliko puta. Takođe, u dva slučaja algoritam slučajne pretrage nije uspeo da se završi u predviđenom vremenu. Kod algoritma BFS-DFS se to nijednom nije desilo. 
+
+Na slici \ref{fig:poredjenje_instrukcija} se mogu videti rezultati poređenja pokrivenosti naredbi (u procentima), dok slika \ref{fig:poredjenje_grana} prikazuje rezultate poređenja pokrivenosti grana (u procentima). Rezultati pokazju da je u najvećem broju slučajeva algoritam koji predlažu autori alata bolji što se tiče pokrivenosti koda (najviše za 7.48\%), ali postoje i slučajevi gde je algoritam BFS-DFS dao bolje rezultate (naredbe \textit{echo}, \textit{false}, \textit{kill}, \textit{nice}, \textit{pwd} i \textit{true}).
+
+\begin{figure}[H]
     \centering
     \includegraphics[width=1.0\linewidth]{poredjenje_vremena_1.png}
-    \caption{Poređenje vremena (u sekundama) rada algoritama na korpusu programa iz GNU Coreutils-a. Kod programa \textit{kill} i \textit{touch} je došlo do prekoračenja vremena algoritmom slučajne pretrage sa heuristikom i usled toga je izvršavanje prekinuto. Maksimalno dozvoljeno vreme izvršavanja je bilo 12 sati.}
+    \caption{Poređenje vremena (u sekundama) rada algoritama na korpusu programa iz GNU Coreutils-a. Kod programa kill i touch je došlo do prekoračenja vremena algoritmom slučajne pretrage sa heuristikom (12 sati) i usled toga je izvršavanje prekinuto.}
     \label{fig:poredjenje_vemena_1}
 \end{figure}
 
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
     \includegraphics[width=1.0\linewidth]{poredjenje_vremena_2.png}
     \caption{Poređenje vremena (u sekundama) rada algoritama na korpusu programa iz GNU Coreutils-a.}
     \label{fig:poredjenje_vemena_2}
 \end{figure}
 
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
     \includegraphics[width=1.0\linewidth]{poredjenje_instrukcije.png}
-    \caption{Poređenje procenta pokrivenosti instrukcija prilikom rada algoritama na korpusu programa iz GNU Coreutils-a.}
+    \caption{Poređenje procenta pokrivenosti naredbi prilikom rada algoritama na korpusu programa iz GNU Coreutils-a.}
     \label{fig:poredjenje_instrukcija}
 \end{figure}
 
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
     \includegraphics[width=1.0\linewidth]{poredjenje_grananja.png}
     \caption{Poređenje procenta pokrivenosti grana prilikom rada algoritama na korpusu programa iz GNU Coreutils-a.}
@@ -941,6 +960,8 @@ Pored opisanog pristupa, bilo je pokušaja neznatne modifikacije algoritma. Poku
 \end{figure}
 
 \newpage
+Rezultati sprovedenog istraživanja i poređenja algoritma BFS-DFS sa algoritmom koji su predložili autori rada su pokazali da je opisanim pristupom, gde se kombinuju pretraga grafa u širinu (da bi se stablo što brže razgranalo) i pretraga grafa u dubinu (kako bi se putanje izučile što dublje je moguće), može uštedeti na vremenu pri čemu se ne gubi previše na pokrivenosti koda. U tabeli \ref{tab:tabela_rezultata} se mogu videti razlike vremena, kao i pokrivenosti naredbi i grana za algoritme BFS-DFS i slučajne pretrage sa heuristikom.
+
 \begin{table}
 {\rowcolors{3}{gray!80!white!40}{gray!80!white!65}
 \begin{tabular}[caption={Osnovni primer simboličkog izvršavanja},captionpos=b,label={lst:tabela_rezultata}]{ |M{2cm}||M{2.5cm}|M{4.3cm}|M{4.3cm}| }
@@ -948,23 +969,23 @@ Pored opisanog pristupa, bilo je pokušaja neznatne modifikacije algoritma. Poku
  \multicolumn{4}{|c|}{Rezultati poređenja algoritama} \\
  \noalign{\global\arrayrulewidth=0.2mm}
  \hline
- Komanda& Razlika u vremenu (s)& Razlika u pokrivenosti instrukcija (\%) & Razlika u pokrivenosti grana (\%)\\
+ Komanda& Razlika u vremenu (s)& Razlika u pokrivenosti naredbi (\%) & Razlika u pokrivenosti grana (\%)\\
  \hline
- chown& -8037.34& -7.48& -6.63 \\ \arrayrulecolor{black}\hline
- cp& -2607.58& -5.15& 4.97 \\\hline
- echo& -2428.85& 0.2& 0.14 \\\hline
- false& 0.11& 0.22& 0.16 \\\hline
- kill& -42099.65& 2.14& 0.24 \\\hline
- logname& -2933.87& -0.35& -0.31 \\ \hline
- mkdir& -8579.38& -0.51& -0.38 \\ \hline
- nice& -3888.14& 0.36& 0.34 \\ \hline
- printf& -19599.61& -2.26& -3.26 \\ \hline
- pwd& 0.12& 0.36& 0.33 \\ \hline
- touch& -27890.6& -5.24& -5.57 \\ \hline
- true& 0.1& 0.22& 0.16 \\
+ chown& \textbf{-8037.34}& -7.48& -6.63 \\ \arrayrulecolor{black}\hline
+ cp& \textbf{-2607.58}& -5.15& -4.97 \\\hline
+ echo& \textbf{-2428.85}& \textbf{0.2}& \textbf{0.14} \\\hline
+ false& 0.11& \textbf{0.22}& \textbf{0.16} \\\hline
+ kill& \textbf{-42099.65}& \textbf{2.14}& \textbf{0.24} \\\hline
+ logname& \textbf{-2933.87}& -0.35& -0.31 \\ \hline
+ mkdir& \textbf{-8579.38}& -0.51& -0.38 \\ \hline
+ nice& \textbf{-3888.14}& \textbf{0.36}& \textbf{0.34} \\ \hline
+ printf& \textbf{-19599.61}& -2.26& -3.26 \\ \hline
+ pwd& 0.12& \textbf{0.36}& \textbf{0.33} \\ \hline
+ touch& \textbf{-27890.6}& -5.24& -5.57 \\ \hline
+ true& 0.1& \textbf{0.22}& \textbf{0.16} \\
  \hline
 \end{tabular}}
-\caption{\label{tab:tabela_rezultata}Poređenje algoritama na korpusu programa iz GNU Coreutils-a. Tabela predstavlja poređenje algoritma BFS-DFS u odnosu na sučajnu pretragu sa heuristikom. Svaka vrednost je dobijena oduzimanjem vrednosti za slučajnu pretragu od njoj odgovarajuće vrednosti koja je dobijena algoritmom predloženim u radu.}
+\caption{\label{tab:tabela_rezultata}Poređenje algoritama na korpusu programa iz GNU Coreutils-a. Tabela predstavlja poređenje algoritma BFS-DFS u odnosu na sučajnu pretragu sa heuristikom. Svaka vrednost je dobijena oduzimanjem vrednosti za slučajnu pretragu od njoj odgovarajuće vrednosti koja je dobijena algoritmom BFS-DFS. Podebljane vrednosti pokazuju gde je algoritam BFS-DFS bio bolji u odnosu na slučajnu pretragu sa heuristikom.}
 \end{table}
 
 % ------------------------------------------------------------------------------
