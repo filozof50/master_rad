@@ -161,7 +161,7 @@ Greške u softveru se neretko javljaju. Kako ljudi pišu softver, greške su nem
 Dva osnovna pristupa verifikaciji softvera su statička i dinamička analiza, odnosno verifikacija. Osnovna razlika između ove dve tehnike je u tome što se dinamička verifikacija vrši tokom izvršavanja programa, odnosno neophodno je pokrenuti isti, dok statička verifikacija analizira k\^od i proverava ispravnost softvera bez njegovog pokretanja.
 
 \subsection{Dinamička verifikacija softvera}
-Dinamička verifikacija softvera se odnosi na proveru ispravnosti softvera u fazi izvršavanja. Dakle, neophodno je kompajlirati k\^od, pokrenuti ga, i onda vršiti analizu. Dinamička verifikacija softvera se uglavnom vrši pisanjem testova pomoću kojih se proverava ispravnosti koda. Njih uglavnom pišu i sprovode testeri, međutim u nekim situacijama to rade i programeri. Tester mora da ima znanje programiranja kako bi pisao kvalitetne testove, da poznaje specifičnosti jezika, da razume softver koji se razvija, korisničke potrebe itd. Postoji više različitih vrsta i tehnika testiranja \cite{testing_book}. 
+Dinamička verifikacija softvera se odnosi na proveru ispravnosti softvera u fazi izvršavanja. Dakle, neophodno je kompajlirati k\^od, pokrenuti ga, i onda vršiti analizu. Dinamička verifikacija softvera se uglavnom vrši pisanjem testova pomoću kojih se proverava ispravnosti koda. Njih uglavnom pišu i sprovode testeri, međutim u nekim situacijama to rade i programeri. Tester mora da ima znanje programiranja kako bi pisao kvalitetne testove, da poznaje specifičnosti jezika, da razume softver koji se razvija, korisničke potrebe itd. Postoji više različitih vrsta i tehnika testiranja \cite{testing_book} \cite{testiranje}. 
 
 \subsection{Statička verifikacija softvera}
 Statička verifikacija softvera se odnosi na proveru ispravnosti koda bez njegovog pokretanja. K\^od nije potrebno kompajlirati niti pokretati kako bi bile proverene eventualne greške u njemu. Postoje dva načina statičke analize softvera.
@@ -193,7 +193,7 @@ Konkretno izvršavanje podrazumeva da su vrednosti svih promenljivih u kodu pozn
 
 \indent Osnovna ideja simboličkog izvršavnja je da se vrši simboličko, a ne konkretno izvršavanje. Za svaku od putanja tokom simboličkog izvršavanja koda se čuvaju sledeći podaci: formula logike prvog reda koja predstavlja uslove koji su bili zadovoljeni u grananjima kroz koja se prošlo i koji su doveli do konkretne putanje i simbolički memorijski prostor u kome se čuvaju vrednosti simboličkih promenljivih. Grananja dovode do ažuriranja formule, dok dodeljivanje vrednosti simboličkim promenljivima dovodi do ažuriranja simboličkog memorijskog prostora. 
 
-\indent Za svaku putanju koja nastaje simboličkim izvršavanjem se kreira formula logike prvog reda koja predstavlja konjukciju ograničenja koja važe za promenljive na tom putu. Neki alati proveravaju da li je putanja uopšte dostižna proverom zadovoljivosti logičke formule. Ukoliko je formula nezadovoljiva, onda je putanja nedostižna u kodu. S druge strane, postoje alati koji ne proveravaju dostižnost putanje, već samo vrše proveru da li može doći do greške kada se naiđe na odgovarajuću naredbu. Provera zadovoljivosti formule se vrši pomoću SMT rešavača \cite{SMT}. 
+\indent Za svaku putanju koja nastaje simboličkim izvršavanjem se kreira formula logike prvog reda koja predstavlja konjukciju ograničenja koja važe za promenljive na tom putu. Neki alati proveravaju da li je putanja uopšte dostižna proverom zadovoljivosti logičke formule. Ukoliko je formula nezadovoljiva, onda je putanja nedostižna u kodu. S druge strane, postoje alati koji ne proveravaju dostižnost putanje, već samo vrše proveru da li može doći do greške kada se naiđe na odgovarajuću naredbu. Provera zadovoljivosti formule se vrši pomoću SMT rešavača \cite{SMT} Z3 \cite{Z3}. 
 
 Ukoliko se simboličkim izvršavanjem dođe do neke naredbe koja može da izazove grešku, logičkoj formuli putanje se dodaje i uslov greške, koji može da bude zadat pomoću funkcije \textit{assert}. Ukoliko je novodobijena formula zadovoljiva u nekoj valuaciji, to znači da može doći do greške u programu, i alat za simboličko izvršavanje onda može da pruži informaciju o tome koje vrednosti ulaznih podataka mogu dovesti do nje.
 
@@ -851,7 +851,14 @@ Klasa \textit{Searcher} (pretraživač) je klasa koja služi kao glavna klasa za
 \end{description}
 
 \section{Implementacija predloženog algoritma}
-Kako bi mogao da bude implementiran novi algoritam u alatu KLEE, potrebno je i napraviti novu klasu. Ova klasa treba da nasleđuje apstraktnu klasu \textit{Searcher} i predefiniše njene važne metode koji su opisani u delu \ref{pretrazivac}. 
+Kako bi mogao da bude implementiran novi algoritam u alatu KLEE, potrebno je i napraviti novu klasu. Ova klasa treba da nasleđuje apstraktnu klasu \textit{Searcher} i predefiniše njene važne metode koji su opisani u delu \ref{pretrazivac}. UML dijagram klase za klasu \textit{BFSDFSSearcher} je prikazan na slici \ref{fig:UML}.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\linewidth]{dijagram_klase.png}
+    \caption{Dijagram klase za novu implementiranu klasu BFSDFSSearcher. }
+    \label{fig:UML}
+\end{figure}
 
 Atributi nove klase su dva vektora pokazivača na stanja. Jedan vektor služi za čuvanje stanja prilikom korišćenja algoritma pretrage grafa u dubinu, dok drugi služi kao dek, i njegova stanja se koriste kada je aktivan algoritam pretrage grafa u širinu. Dodatno postoji promenljiva koja govori o tome da li se izvršava BFS ili DFS algoritam. Postoji promenljiva koja definiše nakon koliko procenata popunjene memorije se prelazi na algoritam pretrage u dubinu. Takođe se čuva i referenca na objekat klase \textit{Executor}. Uloga ovog atributa je opisana u \ref{userSearcher}.
 
