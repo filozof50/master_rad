@@ -89,7 +89,7 @@ cl::opt<double> MemoryPart(
     cl::cat(SearchCat));
 
 cl::opt<int> InstsSinceCoveredNew(
-    "memory-part",
+    "instructions-since-covered-new",
     cl::desc("Number of instructions to remove states in BFS-DFS Searcher when DFS algorithm is active"),
     cl::init(10000),
     cl::cat(SearchCat));
@@ -119,18 +119,18 @@ bool klee::userSearcherRequiresMD2U() {
 Searcher *getNewSearcher(Searcher::CoreSearchType type, Executor &executor) {
   Searcher *searcher = NULL;
   switch (type) {
-  case Searcher::DFS: searcher = new DFSSearcher(); std::cout << "1\n"; break;
-  case Searcher::BFS: searcher = new BFSSearcher(); std::cout << "2\n"; break;
-  case Searcher::RandomState: searcher = new RandomSearcher(); std::cout << "3\n"; break;
-  case Searcher::RandomPath: searcher = new RandomPathSearcher(executor); std::cout << "4\n"; break;
-  case Searcher::NURS_CovNew: searcher = new WeightedRandomSearcher(WeightedRandomSearcher::CoveringNew); std::cout << "5\n"; break;
-  case Searcher::NURS_MD2U: searcher = new WeightedRandomSearcher(WeightedRandomSearcher::MinDistToUncovered); std::cout << "6\n"; break;
-  case Searcher::NURS_Depth: searcher = new WeightedRandomSearcher(WeightedRandomSearcher::Depth); std::cout << "7\n"; break;
-  case Searcher::NURS_RP: searcher = new WeightedRandomSearcher(WeightedRandomSearcher::RP); std::cout << "8\n"; break;
-  case Searcher::NURS_ICnt: searcher = new WeightedRandomSearcher(WeightedRandomSearcher::InstCount); std::cout << "9\n"; break;
-  case Searcher::NURS_CPICnt: searcher = new WeightedRandomSearcher(WeightedRandomSearcher::CPInstCount); std::cout << "10\n"; break;
-  case Searcher::NURS_QC: searcher = new WeightedRandomSearcher(WeightedRandomSearcher::QueryCost); std::cout << "11\n";break;
-  case Searcher::BFS_DFS_SEARCHER: searcher = new BFSDFSSearcher(MemoryPart, InstsSinceCoveredNew, executor); std::cout << "my searcher\n"; break;
+  case Searcher::DFS: searcher = new DFSSearcher(); break;
+  case Searcher::BFS: searcher = new BFSSearcher(); break;
+  case Searcher::RandomState: searcher = new RandomSearcher(); break;
+  case Searcher::RandomPath: searcher = new RandomPathSearcher(executor); break;
+  case Searcher::NURS_CovNew: searcher = new WeightedRandomSearcher(WeightedRandomSearcher::CoveringNew); break;
+  case Searcher::NURS_MD2U: searcher = new WeightedRandomSearcher(WeightedRandomSearcher::MinDistToUncovered); break;
+  case Searcher::NURS_Depth: searcher = new WeightedRandomSearcher(WeightedRandomSearcher::Depth); break;
+  case Searcher::NURS_RP: searcher = new WeightedRandomSearcher(WeightedRandomSearcher::RP); break;
+  case Searcher::NURS_ICnt: searcher = new WeightedRandomSearcher(WeightedRandomSearcher::InstCount); break;
+  case Searcher::NURS_CPICnt: searcher = new WeightedRandomSearcher(WeightedRandomSearcher::CPInstCount); break;
+  case Searcher::NURS_QC: searcher = new WeightedRandomSearcher(WeightedRandomSearcher::QueryCost); break;
+  case Searcher::BFS_DFS_SEARCHER: searcher = new BFSDFSSearcher(MemoryPart, InstsSinceCoveredNew, executor); break;
   }
 
   return searcher;
@@ -140,7 +140,6 @@ Searcher *klee::constructUserSearcher(Executor &executor) {
   Searcher *searcher = getNewSearcher(CoreSearch[0], executor);
 
   if (CoreSearch.size() > 1) {
-      std::cout << "DA DA DA\n";
     std::vector<Searcher *> s;
     s.push_back(searcher);
 
