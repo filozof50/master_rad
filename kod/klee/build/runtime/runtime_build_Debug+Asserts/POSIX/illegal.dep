@@ -1,0 +1,5 @@
+/home/strahinja/repo/klee/build/runtime/runtime_build_Debug+Asserts/POSIX/illegal.bc: \
+  /home/strahinja/repo/klee/runtime/POSIX/illegal.c \
+  /home/strahinja/repo/klee/include/klee/klee.h
+
+/home/strahinja/repo/klee/include/klee/klee.h:

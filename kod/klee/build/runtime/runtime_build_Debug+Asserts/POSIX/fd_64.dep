@@ -1,0 +1,14 @@
+/home/strahinja/repo/klee/build/runtime/runtime_build_Debug+Asserts/POSIX/fd_64.bc: \
+  /home/strahinja/repo/klee/runtime/POSIX/fd_64.c \
+  /home/strahinja/repo/klee/runtime/POSIX/fd.h \
+  /home/strahinja/repo/klee/build/include/klee/Config/config.h \
+  /home/strahinja/repo/klee/include/klee/Config/Version.h \
+  /home/strahinja/repo/klee/include/klee/klee.h
+
+/home/strahinja/repo/klee/runtime/POSIX/fd.h:
+
+/home/strahinja/repo/klee/build/include/klee/Config/config.h:
+
+/home/strahinja/repo/klee/include/klee/Config/Version.h:
+
+/home/strahinja/repo/klee/include/klee/klee.h:

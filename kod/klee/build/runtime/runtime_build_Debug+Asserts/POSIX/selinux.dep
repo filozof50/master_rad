@@ -1,0 +1,5 @@
+/home/strahinja/repo/klee/build/runtime/runtime_build_Debug+Asserts/POSIX/selinux.bc: \
+  /home/strahinja/repo/klee/runtime/POSIX/selinux.c \
+  /home/strahinja/repo/klee/build/include/klee/Config/config.h
+
+/home/strahinja/repo/klee/build/include/klee/Config/config.h:
