@@ -777,7 +777,7 @@ U nekim situacijama se može desiti da je niz DFS stanja prazan. To je slučaj k
             return trazeno_stanje
     \end{lstlisting}
     
-Nakon što se odabere stanje koje će biti naredno izvršeno, ono se izvršava. Pseudo k\^od funkcije za izvršavanje stanja je prikazan u listingu \ref{lst:izvrsi_stanje}. Zavisno od naredbe koja se nalazi u stanju može doći do evolucije stanja ukoliko nije bilo grananja ili može doći do evolucije stanja uz kreiranje novog stanja ukoliko je došlo do nekog grananja. Ukoliko nema grananja već samo evolucije stanja ono se smatra novim stanjem, odnosno dodaje se opet u skup aktivnih stanja tako evoluirano. Ovo se radi kako bi algoritmi koji su opisani u delu \ref{algoritmi} radili ispravno. Takođe, ukoliko je stanje bilo završno, može doći i do njegovog izbacivanja iz niza ili reda stanja jer završno stanje označava kraj putanje. Nakon što se neko stanje izvrši, vrši se ažuriranje skupa aktivnih stanja dodavanjem novonastalih ili brisanjem onih stanja koja su višak.
+Nakon što se odabere stanje koje će biti naredno izvršeno, ono se izvršava. Pseudo k\^od funkcije za izvršavanje stanja je prikazan u listingu \ref{lst:izvrsi_stanje}. Zavisno od naredbe koja se nalazi u stanju može doći do evolucije stanja ukoliko nije bilo grananja ili može doći do evolucije stanja uz kreiranje novog stanja ukoliko je došlo do grananja. Ukoliko nema grananja već samo evolucije stanja ono se smatra novim stanjem, odnosno dodaje se opet u skup aktivnih stanja tako evoluirano. Ovo se radi kako bi algoritmi koji su opisani u delu \ref{algoritmi} radili ispravno. Takođe, ukoliko je stanje bilo završno, može doći i do njegovog izbacivanja iz niza ili reda stanja jer završno stanje označava kraj putanje. Nakon što se neko stanje izvrši, vrši se ažuriranje skupa aktivnih stanja dodavanjem novonastalih ili brisanjem onih stanja koja su višak.
 
     \begin{lstlisting}[caption={Pseudo k\^od funkcije koja izvrsava stanje},captionpos=b,label={lst:izvrsi_stanje}]
     function izvrsi_stanje(stanje):
@@ -796,11 +796,11 @@ Nakon što se odabere stanje koje će biti naredno izvršeno, ono se izvršava. 
       return {nova_stanja, stanja_koja_treba_izbaciti}
     \end{lstlisting}
     
-Kada se ustanovi koja su nova stanja dodata i koja bi trebalo da budu izbačena potrebno je ažurirati red, odnosno niz stanja, zavisno od algoritma koji se u trenutku izvršava. Nevezano od algoritma, sva nova stanja se dodaju na kraj i sva stanja koja je potrebno izbaciti se izbacuju iz odgovarajuce kolekcije (reda, odnosno niza). 
+Kada se ustanovi koja su nova stanja dodata i koja bi trebalo da budu izbačena potrebno je ažurirati red, odnosno niz stanja, zavisno od algoritma koji se u trenutku izvršava. Nevezano od algoritma, sva nova stanja se dodaju na kraj i sva stanja koja je potrebno izbaciti se izbacuju iz odgovarajuće kolekcije (reda, odnosno niza). 
 
 Ukoliko je algoritam koji se u trenutku izvršava pretraga grafa u dubinu dodatno se vrši i provera koliko je izvršeno naredbi od poslednje novootkrivene naredbe. Svaki put kada se počne DFS pretraga za neku putanju, ili kada se otkrije neka nova naredba, pamti se broj do data izvršenih naredbi. Prilikom svakog ažuriranja stanja u DFS nizu se proverava koliko je izvršeno naredbi do tog trenutka. Ukoliko je izvršeno $X$ naredbi od poslednje novootkrivene naredbe ili od trenutka pokretanja pretrage u dubinu za datu putanju, izbacuju se sva stanja u kojima nije bila otkrivena nova naredba. $X$ je vrednost koja se zadaje kao argumemt prilikom pokretanja alata KLEE, i mora biti pozitivan ceo broj. Pseudo kodovi funkcija za ažuriranje stanja su zadati listinzima \ref{lst:azuriraj_stanja}, \ref{lst:azuriraj_BFS} i \ref{lst:azuriraj_DFS}.
 
-    \begin{lstlisting}[caption={Pseudo k\^od funkcije za azuriranje stanja},captionpos=b,label={lst:azuriraj_stanja}]
+    \begin{lstlisting}[caption={Pseudo k\^od funkcije za ažuriranje stanja},captionpos=b,label={lst:azuriraj_stanja}]
     function azuriraj_stanja(skup_novih_stanja, 
                              skup_stanja_koja_treba_izbaciti):
       if izvrsava_se_BFS:
@@ -821,7 +821,7 @@ Ukoliko je algoritam koji se u trenutku izvršava pretraga grafa u dubinu dodatn
 \section{Pregled najvažnijih klasa alata KLEE}
 U ovom delu će biti opisano na koji način je implementiran alat KLEE, biće dat pregled najvažnijih klasa i metoda koje se koriste za simboličko izvršavanje u ovom alatu. Takođe će biti opisano na koji način je implementiran predloženi algoritam, koje su klase izmenjene, i na koji način.
 
-K\^od u alatu Klee je organizovan u više direktorijuma koji pored osnovne implementacije sadrže i dokumentaciju, pomoćne skripte za bildovanje, razne vrste testova i primere. Fajlovi zaglavlja organizovani su u okviru foldera \texttt{klee/include} dok se osnova implementacije nalazi u okviru foldera \texttt{lib}. Specijalno \texttt{lib/Core} sadrzi sve fajlove koji sadrže izvorne kodove za svaku od klasa koje su implementirane u okviru alata, i tu je smestena implementacija BFS-DFS pretrage.
+K\^od u alatu Klee je organizovan u više direktorijuma koji pored osnovne implementacije sadrže i dokumentaciju, pomoćne skripte za bildovanje, razne vrste testova i primere. Fajlovi zaglavlja organizovani su u okviru foldera \texttt{klee/include} dok se osnova implementacije nalazi u okviru foldera \texttt{lib}. Specijalno \texttt{lib/Core} sadrži sve fajlove koji sadrže izvorne kodove za svaku od klasa koje su implementirane u okviru alata, i tu je smeštena implementacija BFS-DFS pretrage.
 
 \subsection{Klasa \textit{Executor}}
 Glavna i najvažnija klasa koja se koristi u KLEE-u je klasa \textit{Executor}. U ovoj klasi postoji metod \textit{run}. Jedini argument koji prima je inicijalno stanje, tj. početno stanje od koga se kreće u pretragu, koren stabla stanja. Unutar ove metode se pre svega kreira pretraživač (eng. \textit{Searcher}). 
@@ -874,9 +874,9 @@ Kako bi mogao da bude implementiran novi algoritam u alatu KLEE, potrebno je i n
     \label{fig:UML}
 \end{figure}
 
-Atributi nove klase su dva vektora pokazivača na stanja. Jedan vektor služi za čuvanje stanja prilikom korišćenja algoritma pretrage grafa u dubinu, dok drugi služi kao dek, i njegova stanja se koriste kada je aktivan algoritam pretrage grafa u širinu. Dodatno postoji promenljiva koja govori o tome da li se izvršava BFS ili DFS algoritam. Postoji promenljiva koja definiše nakon koliko procenata popunjene memorije se prelazi na algoritam pretrage u dubinu. Takođe se čuva i referenca na objekat klase \textit{Executor}. Uloga ovog atributa je opisana u delu \ref{userSearcher}.
+Atributi nove klase su dva vektora pokazivača na stanja. Jedan vektor služi za čuvanje stanja prilikom korišćenja algoritma pretrage grafa u dubinu, dok drugi služi kao dek, i njegova stanja se koriste kada je aktivan algoritam pretrage grafa u širinu. Dodatno postoji promenljiva koja govori o tome da li se izvršava BFS ili DFS algoritam. Postoji promenljiva koja definiše nakon koliko procenata popunjene memorije se prelazi na algoritam pretrage u dubinu. Takođe se čuva i referenca na objekat klase \textit{Executor}. Uloga ovog atributa će biti opisana u delu \ref{userSearcher}.
 
-Pored metoda koje su nasleđene iz nastklase \textit{Searcher} u ovoj klasi postoje i neke dodatne metode koje su potrebne. Kako postoje dva algoritma koja se izvršavaju u ovom pretraživaču postoje posebne metode za ažuriranje odgovarjućih kolekcija stanja. Kada se pozove predefinisani metod za ažuriranje stanja, zavisno od algoritma koji se izvršava, poziva se odgovarajući metod za ažuriranje odgovarajuće kolekcije podataka. 
+Pored metoda koje su nasleđene iz nastklase \textit{Searcher} u ovoj klasi postoji i nekoliko dodatnih metoda. Kako postoje dva algoritma koja se izvršavaju u ovom pretraživaču postoje posebne metode za ažuriranje odgovarjućih kolekcija stanja. Kada se pozove predefinisani metod za ažuriranje stanja, zavisno od algoritma koji se izvršava, poziva se odgovarajući metod za ažuriranje odgovarajuće kolekcije podataka. 
 
 Takođe postoji metod koji pronalazi stanje u deku BFS stanja koje je najbliže nekoj neposećenoj naredbi. Ovaj metod se koristi prilikom prelaska sa algoritma pretrage grafa u širinu na algoritam pretrage u dubinu, odnosno kad se kreće u izučavanje neke putanje u dubinu. Kako bi se otkrilo koja putanja garantuje da će se najpre naći neka nova naredba koristi se ovaj metod. 
 
