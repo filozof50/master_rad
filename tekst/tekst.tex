@@ -55,6 +55,7 @@
     urlcolor=cyan,
 }
 \usepackage{listings, multicol} % listing programskog koda
+\usepackage{caption}
 
 \usepackage{capt-of}
 \makeatletter
@@ -599,7 +600,7 @@ U ovom delu će biti prikazan rad algoritama DFS i BFS na primeru koji je dat u 
 
 \begin{figure}
 \noindent\begin{minipage}[t]{.45\textwidth}
-\begin{lstlisting}[label={lst:primer_KLEE}, captionpos=b]
+\begin{lstlisting}
    void foo(int a) 
    {
      if (a > 1000) {
@@ -654,6 +655,7 @@ U ovom delu će biti prikazan rad algoritama DFS i BFS na primeru koji je dat u 
 \end{lstlisting}
 \end{minipage}
 \captionof{lstlisting}{Primer simboličkog izvršavanja u alatu KLEE}
+\label{lst:primer_KLEE}
 \end{figure}
 
 \begin{figure}[ht]
@@ -819,7 +821,7 @@ Ukoliko je algoritam koji se u trenutku izvršava pretraga grafa u dubinu dodatn
 \section{Pregled najvažnijih klasa alata KLEE}
 U ovom delu će biti opisano na koji način je implementiran alat KLEE, biće dat pregled najvažnijih klasa i metoda koje se koriste za simboličko izvršavanje u ovom alatu. Takođe će biti opisano na koji način je implementiran predloženi algoritam, koje su klase izmenjene, i na koji način.
 
-K\^od u alatu Klee je organizovan u više direktorijuma koji pored osnovne implementacije sadrže i dokumentaciju, pomoćne skripte za bildovanje, razne vrste testova i primere. Fajlovi zaglavlja organizovani su u okviru foldera klee/include dok se osnova implementacije nalazi u okviru foldera lib. Specijalno lib/Core sadrzi sve fajlove koji sadrže izvorne kodove za svaku od klasa koje su implementirane u okviru alata, i tu je smestena implementacija BFS-DFS pretrage.
+K\^od u alatu Klee je organizovan u više direktorijuma koji pored osnovne implementacije sadrže i dokumentaciju, pomoćne skripte za bildovanje, razne vrste testova i primere. Fajlovi zaglavlja organizovani su u okviru foldera \texttt{klee/include} dok se osnova implementacije nalazi u okviru foldera \texttt{lib}. Specijalno \texttt{lib/Core} sadrzi sve fajlove koji sadrže izvorne kodove za svaku od klasa koje su implementirane u okviru alata, i tu je smestena implementacija BFS-DFS pretrage.
 
 \subsection{Klasa \textit{Executor}}
 Glavna i najvažnija klasa koja se koristi u KLEE-u je klasa \textit{Executor}. U ovoj klasi postoji metod \textit{run}. Jedini argument koji prima je inicijalno stanje, tj. početno stanje od koga se kreće u pretragu, koren stabla stanja. Unutar ove metode se pre svega kreira pretraživač (eng. \textit{Searcher}). 
@@ -827,10 +829,10 @@ Pretraživač je samo objekat klase koja zapravo vrši pretragu u stablu stanja.
 
 Glavni deo ovog metoda je petlja u kojoj se vrši kompletno izvršavanje (listing \ref{lst:glavna}). Ovaj metod uz priložen pseudo k\^od je prikazan u delu \ref{ideja_algoritma}.
 
-Prilikom izvršavanja svake od naredbi se dodatno i menja logička formula koja se čuva u stanju. Logička formula u stanju odgovara uslovima koji važe za sve promenljive na nekoj putanji. Kada se dođe u neko stanje, putanja kroz k\^od je jedinstveno određena nizom stanja koja su prethodila tom stanju na putanji. Samim tim je i formula logike prvog reda jedinstveno određena za tu putanju, jer je ona nastala propagiranjem kroz niz stanja kojima se došlo u trenutno stanje. Ukoliko dolazi do evolucije stanja, formula se samo ažurira ukoliko ima potrebe za tim, a ako dođe do grananja, u stanju koje je evoluiralo dolazi do ažuriranja formule, dok se u novonastalom stanju nasledjuje formula iz stanja iz kog je ono nastalo kojoj se dodaje i uslova grananja. Za konjukciju i disjunkciju su implementirane klase u okviru alata.    
+Prilikom izvršavanja svake od naredbi se dodatno i menja logička formula koja se čuva u stanju. Logička formula u stanju odgovara uslovima koji važe za sve promenljive na nekoj putanji. Kada se dođe u neko stanje, putanja kroz k\^od je jedinstveno određena nizom stanja koja su prethodila tom stanju na putanji. Samim tim je i formula logike prvog reda jedinstveno određena za tu putanju, jer je ona nastala propagiranjem kroz niz stanja kojima se došlo u trenutno stanje. Ukoliko dolazi do evolucije stanja, formula se samo ažurira ukoliko ima potrebe za tim, a ako dođe do grananja, u stanju koje je evoluiralo dolazi do ažuriranja formule, dok se u novonastalom stanju nasleđuje formula iz stanja iz kog je ono nastalo kojoj se dodaje i uslova grananja. Za konjukciju i disjunkciju su implementirane klase u okviru alata.    
     
 \subsection{Klasa \textit{ExecutionState}}
-U nastavku će biti dat kratak pregled klase \textit{ExecutionState}, koja predstavlja jedno stanje koje se izvršava. U ovoj klasi je najvažniji metod \textit{branch}, koji vrši grananje, tj. u kojem se prilikom grananja formira novo stanje. S druge strane, kako jedna instanca ove klase predstavlja stanje, u njoj postoji veći broj veoma zanimljivih atributa. Neki od njih su:
+Klasa \textit{ExecutionState} predstavlja jedno stanje koje se izvršava. U ovoj klasi je najvažniji metod \textit{branch}, koji vrši grananje, tj. u kojem se prilikom grananja formira novo stanje. S druge strane, kako jedna instanca ove klase predstavlja stanje, u njoj postoji veći broj veoma zanimljivih atributa. Neki od njih su:
 
 \begin{description}
     \item \textbf{\textit{pc}} - predstavlja narednu naredbu koja treba da bude izvršena.
